@@ -8,12 +8,15 @@ User interface components created with [svg.js](https://github.com/svgdotjs/svg.
 
 add entry point
 
-`import * as shape from './src/tds-shapes/tds-shapes-entry'`
+```typescript
+import * as shape from './src/tds-shapes/tds-shapes-entry'
+```
 
 adds [svg.js](https://svgjs.com/docs/3.0/getting-started/) canvas:
 
-````typescript
+```typescript
 let draw = SVG().addTo('body').size(300, 300)
+```
 
 lets create simple label:
 
@@ -47,5 +50,5 @@ const lm = (s: string, p: { x: number; y: number }) => {
   }).draggable()
 }
 
-draw.add(lm('whĄt a beautiful day', { x: 40, y: 50 }))
-````
+draw.add(lm('Hello world!', { x: 40, y: 50 }))
+```
