@@ -18,6 +18,8 @@ adds [svg.js](https://svgjs.com/docs/3.0/getting-started/) canvas:
 let draw = SVG().addTo('body').size(300, 300)
 ```
 
+### label
+
 lets create simple label, ... 4 instance:
 
 ```typescript
