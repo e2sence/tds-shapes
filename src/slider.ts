@@ -419,13 +419,10 @@ export class slider extends G {
       return ml
     }
 
-    let op_id: string
     // coordinates
     tickKindOrder.forEach((el) => {
       if (t) {
         if (t[el]) {
-          op_id = `${this.id()}_${el}`
-
           let count = Math.floor((p.max - p.min) / t[el].step)
 
           // distance between ticks
@@ -453,25 +450,6 @@ export class slider extends G {
                 break
             }
           }
-
-          // set defs
-          // let defel: Element
-
-          // if (t[el].shape) {
-          //   defel = t[el].shape
-          // } else {
-          //   defel = tline(
-          //     el,
-          //     t[el].side,
-          //     t[el].size,
-          //     t[el].sizeBase,
-          //     t[el].stroke
-          //   )
-          // }
-
-          // defel.id(op_id)
-
-          // this.root().defs().add(defel)
         }
       }
 
