@@ -52,3 +52,5 @@ const lm = (s: string, p: { x: number; y: number }) => {
 
 draw.add(lm('Hello world!', { x: 40, y: 50 }))
 ```
+
+![Image of label](../img/tds-label.png)
