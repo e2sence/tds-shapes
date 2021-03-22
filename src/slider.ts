@@ -478,7 +478,6 @@ export class slider extends G {
       // draw ticks
       res[el].forEach((cel) => {
         let sd = this.ticks[el].side
-        // let rbl = this.ticksGroup.use(op_id)
 
         let noUseLine = tline(el, sd, t[el].size, t[el].sizeBase, t[el].stroke)
 
@@ -513,28 +512,6 @@ export class slider extends G {
         }
 
         this.ticksGroup.add(noUseLine)
-
-        // if (or == 'horizontal') {
-        //   let horCor = cel - rbl.bbox().w / 2
-
-        //   sd == 'down' && rbl.move(horCor, rb.y2 - rb.height / 2)
-
-        //   sd == 'up' && rbl.move(horCor, rb.y - rbl.bbox().h + rb.height / 2)
-
-        //   if (sd == 'both') {
-        //     rbl.move(horCor, rb.y2 - rbl.bbox().h / 2 - rb.height / 2)
-        //   }
-        // }
-        // if (or == 'vertical') {
-        //   let verCor = cel - rbl.bbox().h / 2
-
-        //   sd == 'down' && rbl.move(rb.x2 - rb.width / 2, verCor)
-
-        //   sd == 'up' && rbl.move(rb.x - rbl.bbox().w + rb.width / 2, verCor)
-
-        //   sd == 'both' &&
-        //     rbl.move(rb.x2 - rbl.bbox().w / 2 - rb.width / 2, verCor)
-        // }
       })
     })
   }
