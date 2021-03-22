@@ -1,6 +1,6 @@
 {
   "name": "tds_shapes",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -9,7 +9,9 @@
   "author": "Iurii Dzhugostranskii",
   "license": "ISC",
   "homepage": "https://github.com/e2sence/tds-shapes",
-  "repository": {"url": "https://github.com/e2sence/tds-shapes"},
+  "repository": {
+    "url": "https://github.com/e2sence/tds-shapes"
+  },
   "devDependencies": {
     "ts-loader": "^8.0.12",
     "typescript": "^4.1.3",
