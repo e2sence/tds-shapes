@@ -4,4 +4,6 @@ User interface components created with [svg.js](https://github.com/svgdotjs/svg.
 
 ## Usage example
 
-`git clone`
+`git clone https://github.com/e2sence/tds-shapes.git`
+
+`import * as shape from './src/tds-shapes/tds-shapes-entry'`
