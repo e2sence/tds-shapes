@@ -18,18 +18,19 @@ adds [svg.js](https://svgjs.com/docs/3.0/getting-started/) canvas:
 let draw = SVG().addTo('body').size(300, 300)
 ```
 
-lets create simple label:
+lets create simple label, ... 4 instance:
 
 ```typescript
-/**
- * creating a label with the specified properties
+//**
+ * creating a label attributes
  * @param s text on label
  * @param p position
+ * @returns LabelAttr instance
  */
-const lm = (s: string, p: { x: number; y: number }) => {
-  return new shape.label({
+const la = (s: string | number, p: { x: number; y: number } = { x: 0, y: 0 }): shape.LabelAttr => {
+  return {
     title: {
-      value: s,
+      value: typeof s == 'number' ? s.toString() : s,
       font: 'Menlo',
       fontWeight: 'normal',
       size: 12,
@@ -47,10 +48,21 @@ const lm = (s: string, p: { x: number; y: number }) => {
     backgroundRule: ['indent'],
     indents: [5, 3, 5, 3],
     position: { x: p.x, y: p.y },
-  }).draggable()
+  }
 }
 
-draw.add(lm('Hello world!', { x: 40, y: 50 }))
-```
+/**
+ * creating a label with the specified properties
+ * @param s text on label
+ * @param p position
+ * @returns label instance
+ */
+const lm = (s: string, p: { x: number; y: number }) => {
+  return new shape.label(la(s, p)).draggable()
+}
 
-![Image of label](./img/tds-label.png)
+draw.add(lm('whĄt a beautiful day', { x: 40, y: 50 }))
+draw.add(lm('wĤat a beautiful tree st͜ump', { x: 40, y: 70 }))
+draw.add(lm('How beAutiful I Äm', { x: 40, y: 90 }))
+draw.add(lm('and my s̬ong', { x: 40, y: 110 }))
+```
