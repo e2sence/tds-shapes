@@ -20,7 +20,7 @@ let draw = SVG().addTo('body').size(300, 300)
 
 ### label
 
-lets create simple label, ... 4 instance:
+lets create simple label, ... 7 instance:
 
 ```typescript
 /**
@@ -62,7 +62,7 @@ const la = (
  * @param p position
  * @returns label instance
  */
-const lm = (s: string, p: { x: number; y: number }) => {
+const lm = (s: string | number, p: { x: number; y: number }) => {
   return new shape.label(la(s, p)).draggable()
 }
 
@@ -70,4 +70,8 @@ draw.add(lm('whĄt a beautiful day', { x: 40, y: 50 }))
 draw.add(lm('wĤat a beautiful tree st͜ump', { x: 40, y: 70 }))
 draw.add(lm('How beAutiful I Äm', { x: 40, y: 90 }))
 draw.add(lm('and my s̬ong', { x: 40, y: 110 }))
+
+draw.add(lm(21111977, { x: 40, y: 150 }))
+draw.add(lm(27111981, { x: 40, y: 170 }))
+draw.add(lm('08112006', { x: 40, y: 190 }))
 ```
