@@ -1,3 +1,3 @@
 # tds-shapes
 
-User interface components created with
+User interface components created with [svg.js](https://github.com/svgdotjs/svg.js)
