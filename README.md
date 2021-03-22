@@ -23,13 +23,16 @@ let draw = SVG().addTo('body').size(300, 300)
 lets create simple label, ... 4 instance:
 
 ```typescript
-//**
+/**
  * creating a label attributes
  * @param s text on label
  * @param p position
  * @returns LabelAttr instance
  */
-const la = (s: string | number, p: { x: number; y: number } = { x: 0, y: 0 }): shape.LabelAttr => {
+const la = (
+  s: string | number,
+  p: { x: number; y: number } = { x: 0, y: 0 }
+): shape.LabelAttr => {
   return {
     title: {
       value: typeof s == 'number' ? s.toString() : s,
