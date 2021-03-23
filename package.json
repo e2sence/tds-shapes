@@ -15,8 +15,14 @@
   },
   "keywords": [
     "svgjs",
-    "slider",
-    "range slider"
+    "svg slider",
+    "svgslider",
+    "svg range slider",
+    "ui",
+    "label",
+    "textbox",
+    "svg textbox",
+    "svgtextbox"
   ],
   "devDependencies": {
     "ts-loader": "^8.0.12",
