@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "prepublish": "tsc",
     "test": "echo \"No test specified\""
   },
   "author": "Iurii Dzhugostranskii",
