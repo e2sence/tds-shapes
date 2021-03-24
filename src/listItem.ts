@@ -73,6 +73,13 @@ export const ItemDefaultBehavior: ItemPartsBehavior = [
           stroke: { color: '#999999', width: 1 },
         },
       },
+      {
+        condition: 'inactive',
+        attr: {
+          fill: { color: '#999999' },
+          stroke: { color: '#999999', width: 1 },
+        },
+      },
     ],
   },
   // label
@@ -86,6 +93,10 @@ export const ItemDefaultBehavior: ItemPartsBehavior = [
       {
         condition: 'mouseenter',
         attr: { fill: { color: 'white' } },
+      },
+      {
+        condition: 'inactive',
+        attr: { fill: { color: '#F2F2F2' } },
       },
     ],
   },
@@ -160,33 +171,41 @@ export const ItemDefaultBehavior: ItemPartsBehavior = [
 //?  A  A  A  A  A  A  A
 //?  |  |  |  |  |  |  |
 //?        bottom
-export class item extends label {
+export type ListItemAttr = {
+  label: LabelAttr
+  kind: ItemType
+  width: number
+  suppIndent?: number
+
+  icon?: ItemIconStyle
+  shortcut?: TitleStyle
+
+  behavior?: ItemPartsBehavior
+  condition?: ItemCondition
+  state?: ItemState
+}
+
+export class listItem extends label {
   // -- title
   // -- background
 
+  /** 'general' | 'icon' | 'shortcut' */
   kind: ItemType
+  /** top most item for intercept external influences */
   foreground: Rect
 
+  /** reaction to external influences */
   behavior: ItemPartsBehavior
+  /** condition reflecting effect */
   condition?: ItemCondition = 'normal'
   state?: ItemState = 'active'
 
+  /** Path | title, typicaly at the end */
   suppItem: Path | title
+  /** Path | title indent from right side */
   suppIndent: number = 15
 
-  constructor(attr: {
-    label: LabelAttr
-    kind: ItemType
-    width: number
-    suppIndent?: number
-
-    icon?: ItemIconStyle
-    shortcut?: TitleStyle
-
-    behavior?: ItemPartsBehavior
-    condition?: ItemCondition
-    state?: ItemState
-  }) {
+  constructor(attr: ListItemAttr) {
     super(attr.label)
 
     this.kind = attr.kind
@@ -250,6 +269,10 @@ export class item extends label {
     })
   }
 
+  moveTo(x: number, y: number) {
+    this.move(x, y)
+  }
+
   /**
    * change the appearance of the element depending on the external influence
    * @param c current condition
@@ -271,7 +294,7 @@ export class item extends label {
 
 //! wtf (...
 const getB = (
-  i: item,
+  i: listItem,
   rop: any,
   c?: ItemCondition,
   pt?: ItemPartType

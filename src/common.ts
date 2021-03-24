@@ -1,4 +1,4 @@
-import { Element, FillData, G, StrokeData } from '@svgdotjs/svg.js'
+import { Element, FillData, StrokeData } from '@svgdotjs/svg.js'
 
 export type StyleSize = 'xxs' | 'xs' | 's' | 'm' | 'l' | 'xl' | 'xxl'
 
