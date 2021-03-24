@@ -1,18 +1,6 @@
-import {
-  Element,
-  FillData,
-  G,
-  StrokeData,
-} from '@svgdotjs/svg.js'
+import { Element, FillData, G, StrokeData } from '@svgdotjs/svg.js'
 
-export type StyleSize =
-  | 'xxs'
-  | 'xs'
-  | 's'
-  | 'm'
-  | 'l'
-  | 'xl'
-  | 'xxl'
+export type StyleSize = 'xxs' | 'xs' | 's' | 'm' | 'l' | 'xl' | 'xxl'
 
 export type FontWeight =
   | 'normal'
@@ -92,19 +80,30 @@ export type SliderTicks = {
   subhalf: Tick
 }
 
+export type ItemIconStyle = {
+  d: string
+  fill: FillData
+  stroke: StrokeData
+}
+
+export type ItemType = 'general' | 'icon' | 'shortcut'
+
+export type ItemPatType =
+  | 'background'
+  | 'title'
+  | 'icon'
+  | 'foreground'
+  | 'shotrcut'
+
 export type Position = { x: number; y: number }
 
 /** simple ID string for object identification
  * @returns string like 'T40fbb0e49f748c'
  */
 export function Create_ID() {
-  return `T${(~~(
-    (Math.random() * (1 - 0.5) + 0.5) *
-    1e8
-  )).toString(16)}${(~~(
-    (Math.random() * (1 - 0.5) + 0.5) *
-    1e8
-  )).toString(16)}`
+  return `T${(~~((Math.random() * (1 - 0.5) + 0.5) * 1e8)).toString(
+    16
+  )}${(~~((Math.random() * (1 - 0.5) + 0.5) * 1e8)).toString(16)}`
 }
 
 /**
