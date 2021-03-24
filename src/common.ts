@@ -88,12 +88,7 @@ export type ItemIconStyle = {
 
 export type ItemType = 'general' | 'icon' | 'shortcut'
 
-export type ItemPatType =
-  | 'background'
-  | 'title'
-  | 'icon'
-  | 'foreground'
-  | 'shotrcut'
+export type ItemState = 'active' | 'inactive'
 
 export type Position = { x: number; y: number }
 
@@ -163,4 +158,19 @@ export const vTo01 = (
  */
 export const rndX = (n: number, x: number): number => {
   return Math.round(n / x) * x
+}
+
+/**
+ * fill source with target
+ * @param s source
+ * @param t target
+ */
+export const objectMerge = (s: any, t: any): void => {
+  Object.keys(s).forEach((prop) => {
+    if (typeof s[prop] == 'object' || undefined) {
+      !t[prop] ? (t[prop] = s[prop]) : objectMerge(s[prop], t[prop])
+    } else {
+      !t[prop] ? (t[prop] = s[prop]) : 0
+    }
+  })
 }
