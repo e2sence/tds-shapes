@@ -1,5 +1,5 @@
 import { StrokeData, Line } from '@svgdotjs/svg.js'
-import { ItemType } from './common'
+import { Create_ID, ItemType } from './common'
 
 /**
  * @param start start position {x: , y:}
@@ -22,6 +22,7 @@ export type ISeparatorTemplate = {
 export class separator extends Line {
   constructor(attr: ISeparatorTemplate) {
     super()
+    this.id(Create_ID()).addClass('tds-separator')
 
     // set appearance
     this.stroke(attr.stroke)

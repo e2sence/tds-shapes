@@ -75,7 +75,3 @@ draw.add(lm(21111977, { x: 40, y: 150 }))
 draw.add(lm(27111981, { x: 40, y: 170 }))
 draw.add(lm('08112006', { x: 40, y: 190 }))
 ```
-
-sipmle config for list:
-
-<script src="https://gist.github.com/e2sence/59081666e7609c57842fb2bcf34f5ec3.js"></script>

@@ -2,6 +2,7 @@ import { StrokeData } from '@svgdotjs/svg.js'
 import { Path, Rect, FillData } from '@svgdotjs/svg.js'
 
 import {
+  Create_ID,
   ItemIconStyle,
   ItemState,
   ItemType,
@@ -44,7 +45,7 @@ export const ItemDefaultBehavior: ItemPartsBehavior = [
   // background
   { itemPart: 'background',
     behavior: [
-      { condition: 'normal', attr: { fill: { color: '#EEEEEE' }, stroke: { color: '#D2D2D2', width: 1 },},},
+      { condition: 'normal', attr: { fill: { color: '#EEEEEE' }, stroke: { color: 'transparent', width: 1 },},},
       { condition: 'mouseenter', attr: { fill: { color: '#00AAFF' }, stroke: { color: '#00AAFF', width: 1 }, }, },
       { condition: 'onclick', attr: { fill: { color: '#999999' }, stroke: { color: '#999999', width: 1 }, }, },
       { condition: 'inactive', attr: { fill: { color: '#999999' }, stroke: { color: '#999999', width: 1 }, }, }, ], },
@@ -118,6 +119,7 @@ export class listItem extends label {
 
   constructor(attr: ListItemAttr) {
     super(attr.label)
+    this.id(Create_ID()).addClass('tds-listItem')
 
     this.kind = attr.kind
     // check type and adds icon or shortcut to core
@@ -167,7 +169,7 @@ export class listItem extends label {
       this.condition != 'highlight'
         ? (this.condition = 'mouseenter')
         : 0
-      this.front()
+      // this.front()
       this.applyBehavior()
     })
     this.foreground.on('mouseleave', () => {
@@ -176,6 +178,13 @@ export class listItem extends label {
     })
     this.foreground.on('mousedown', () => {
       this.condition = 'onclick'
+      this.applyBehavior()
+    })
+    this.foreground.on('mouseup', () => {
+      this.condition != 'highlight'
+        ? (this.condition = 'mouseenter')
+        : 0
+      this.front()
       this.applyBehavior()
     })
   }
@@ -210,11 +219,20 @@ const getB = (
   c?: ListItemCondition,
   pt?: ItemPartType
 ) => {
+  let dbc
   let bf = i.behavior.find((el) => el.itemPart == pt)
-
-  let dbc = bf && bf.behavior.find((el) => el.condition == c)
-
-  // ItemDefaultBehavior
+  if (bf) {
+    dbc = bf.behavior.find((el) => el.condition == c)
+    !dbc &&
+      (dbc = ItemDefaultBehavior.find(
+        (el) => el.itemPart == pt
+      ).behavior.find((el) => el.condition == c))
+  }
+  if (!bf) {
+    dbc = ItemDefaultBehavior.find(
+      (el) => el.itemPart == pt
+    ).behavior.find((el) => el.condition == c)
+  }
   dbc &&
     (rop.fill({ ...dbc.attr.fill }),
     rop.stroke({ ...dbc.attr.stroke }))

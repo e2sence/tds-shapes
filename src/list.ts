@@ -25,6 +25,7 @@ export type ListItemInstanceAttr = {
 // list overal description
 export type ListAttr = {
   body: BackgroundStyle
+  autoHeight?: boolean
   indents: Indents
   subItemIndents: {
     item: number
@@ -51,10 +52,11 @@ export const ListAttrDefault: ListAttr = {
     radius: 10,
     position: { x: 300, y: 300 },
   },
-  indents: [8, 8, 8, 8],
+  autoHeight: true,
+  indents: [5, 8, 5, 8],
   subItemIndents: {
     item: 0,
-    separator: 20,
+    separator: 5,
     itemIcon: 20,
     itemShortcut: 20,
   },
@@ -76,25 +78,39 @@ export const ListAttrDefault: ListAttr = {
       height: 20,
       fill: { color: '#EEEEEE' },
       stroke: { color: '#EEEEEE' },
-      radius: 8,
+      radius: 4,
       position: { x: 0, y: 0 },
     },
-    indents: [13, 5, 3, 5],
+    indents: [8, 2, 8, 2],
     position: { x: 0, y: 0 },
   },
+
+  // prettier-ignore
+  itemsBehavior: [{
+      itemPart: 'background', behavior: [
+        //    { condition: 'normal', attr: { fill: { color: 'red' }, stroke: { color: 'blue', width: 2 } } },
+        //    { condition: 'mouseenter', attr: {fill: {color: 'grey'}, stroke: { color: 'black', width: 2}}}
+      ]}, {
+      itemPart: 'shotrcut', behavior: [
+        //    {condition: 'mouseenter', attr: {fill: { color : 'red'}}},
+        //    {},   
+          ]
+      }],
 
   // prettier-ignore
   itemsInstances: [
     { kind: 'general', str: 'File'},
     { kind: 'general', str: 'Edit' },
-    { kind: 'shortcut', str: 'Window', shortcut: {value: 'cmd + X', font: 'Menlo', fontWeight: 'normal', size: 12, position: {x: 0, y: 0}, fill: {color: 'red'}}},
+    { kind: 'shortcut', str: 'Window', shortcut: {value: 'cmd + X', font: 'Menlo', fontWeight: 'normal', size: 12, position: {x: 0, y: 0}, fill: {color: 'green'}}},
     { kind: 'general', str: 'View' },
     { kind: 'icon', str: 'Magic line', icon: { d: iconPath.rightChevron, fill: {color: 'black'}, stroke: {color: 'black'}}},
     { kind: 'general', str: 'Terminal'},
+    { kind: 'general', str: 'Wait a minutes...'},
     ],
   // prettier-ignore
   separatorsInstances: [
-      {order: 3, value: {start: {x: 0, y: 0}, length: 180, stroke: {color: 'black'}} }
+      {order: 2, value: {start: {x: 25, y: 0}, length: 160, stroke: {color: '#D2D2D2'}} },
+      {order: 4, value: {start: {x: 25, y: 0}, length: 160, stroke: {color: '#D2D2D2'}} }
   ],
 }
 
@@ -116,35 +132,38 @@ export class list extends G {
     this.add(this.body)
 
     // create items
-    let seprCount = 0
-    let itemCount = 0
-    let curItemHeight = 0
+    let summHeight = 0
     attr.itemsInstances.forEach((ii, num) => {
-      // base indent
-      let isi = attr.subItemIndents.item
-      let bi = {
-        x: attr.indents[0],
-        y: attr.indents[0] + isi,
+      num == 0 && (summHeight += attr.indents[1])
+
+      // check separator
+      let isSep = attr.separatorsInstances.find(
+        (el) => el.order == num
+      )
+      if (isSep) {
+        isSep.value.start.y =
+          summHeight + attr.subItemIndents.separator
+        this.items.push(new separator(isSep.value))
+        summHeight += attr.subItemIndents.separator * 2
       }
 
+      // base indent
+
       let el
-      // set string
+      // get item style
       let is = attr.itemsStyle
+      // set string
       is.title.value = ii.str
-      if (num == 0) {
-        is.position = { x: attr.indents[0], y: attr.indents[1] }
-      } else {
-        is.position = {
-          x: attr.indents[0],
-          y: num * curItemHeight + attr.indents[1],
-        }
-      }
+      // set position
+      is.position.y = summHeight
+      is.position.x = attr.indents[0]
 
       if (ii.kind == 'general') {
         el = new listItem({
           label: is,
           kind: 'general',
           width: attr.itemWidth,
+          behavior: attr.itemsBehavior,
         }).draggable()
       }
       if (ii.kind == 'shortcut') {
@@ -154,6 +173,7 @@ export class list extends G {
           width: attr.itemWidth,
           suppIndent: 20,
           shortcut: ii.shortcut,
+          behavior: attr.itemsBehavior,
         }).draggable()
       }
       if (ii.kind == 'icon') {
@@ -163,17 +183,20 @@ export class list extends G {
           width: attr.itemWidth,
           suppIndent: 20,
           icon: ii.icon,
+          behavior: attr.itemsBehavior,
         }).draggable()
       }
-      num == 0 &&
-        (curItemHeight =
-          el.title.bbox().height + el.indents[1] + el.indents[3]) // set items height
 
-      //   console.log(curItemHeight + el.indents[1] + el.indents[3])
-
+      // adds element to list items collection
       this.items.push(el)
+      // increase overal items height
+      summHeight +=
+        el.title.bbox().height + el.indents[1] + el.indents[3]
     })
 
     this.items.forEach((i) => this.add(i))
+
+    // set auto height
+    attr.autoHeight && this.body.height(attr.indents[3] + summHeight)
   }
 }
