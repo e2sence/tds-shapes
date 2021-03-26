@@ -11,7 +11,7 @@ import { label, LabelAttr } from './label'
 import { title } from './title'
 
 /** events to which the object reacts */
-export type ItemCondition =
+export type ListItemCondition =
   | 'normal'
   | 'mouseenter'
   | 'onclick'
@@ -30,7 +30,7 @@ export type ItemPartType =
 
 // behavior dependent condition
 export type Behavior = {
-  condition?: ItemCondition
+  condition?: ListItemCondition
   attr?: { fill?: FillData; stroke?: StrokeData }
 }
 
@@ -39,126 +39,37 @@ export type ItemPartsBehavior = {
   behavior: Behavior[]
 }[]
 
-export const itemPartOrder: ItemPartType[] = [
-  'background',
-  'title',
-  'icon',
-  'shotrcut',
-  'foreground',
-]
-
+// prettier-ignore
 export const ItemDefaultBehavior: ItemPartsBehavior = [
   // background
-  {
-    itemPart: 'background',
+  { itemPart: 'background',
     behavior: [
-      {
-        condition: 'normal',
-        attr: {
-          fill: { color: '#EEEEEE' },
-          stroke: { color: '#D2D2D2', width: 1 },
-        },
-      },
-      {
-        condition: 'mouseenter',
-        attr: {
-          fill: { color: '#00AAFF' },
-          stroke: { color: '#00AAFF', width: 1 },
-        },
-      },
-      {
-        condition: 'onclick',
-        attr: {
-          fill: { color: '#999999' },
-          stroke: { color: '#999999', width: 1 },
-        },
-      },
-      {
-        condition: 'inactive',
-        attr: {
-          fill: { color: '#999999' },
-          stroke: { color: '#999999', width: 1 },
-        },
-      },
-    ],
-  },
+      { condition: 'normal', attr: { fill: { color: '#EEEEEE' }, stroke: { color: '#D2D2D2', width: 1 },},},
+      { condition: 'mouseenter', attr: { fill: { color: '#00AAFF' }, stroke: { color: '#00AAFF', width: 1 }, }, },
+      { condition: 'onclick', attr: { fill: { color: '#999999' }, stroke: { color: '#999999', width: 1 }, }, },
+      { condition: 'inactive', attr: { fill: { color: '#999999' }, stroke: { color: '#999999', width: 1 }, }, }, ], },
   // label
-  {
-    itemPart: 'title',
+  { itemPart: 'title',
     behavior: [
-      {
-        condition: 'normal',
-        attr: { fill: { color: 'black' } },
-      },
-      {
-        condition: 'mouseenter',
-        attr: { fill: { color: 'white' } },
-      },
-      {
-        condition: 'inactive',
-        attr: { fill: { color: '#F2F2F2' } },
-      },
-    ],
+      { condition: 'normal', attr: { fill: { color: 'black' } }, },
+      { condition: 'mouseenter', attr: { fill: { color: 'white' } }, },
+      { condition: 'inactive',  attr: { fill: { color: '#F2F2F2' } }, }, ],
   },
   // foreground
-  {
-    itemPart: 'foreground',
+  { itemPart: 'foreground',
     behavior: [
-      {
-        condition: 'normal',
-        attr: {
-          fill: { color: 'transparent' },
-          stroke: { color: 'transparent' },
-        },
-      },
-      {
-        condition: 'mouseenter',
-        attr: {
-          fill: { color: '#00AAFF' },
-          stroke: { color: 'transparent' },
-        },
-      },
-    ],
-  },
+      { condition: 'normal', attr: { fill: { color: 'transparent' }, stroke: { color: 'transparent' }, }, },
+      { condition: 'mouseenter', attr: { fill: { color: 'transparent' },  stroke: { color: 'transparent' }, }, }, ], },
   // shortcut
-  {
-    itemPart: 'shotrcut',
+  { itemPart: 'shotrcut',
     behavior: [
-      {
-        condition: 'normal',
-        attr: {
-          fill: { color: '#999999' },
-        },
-      },
-      {
-        condition: 'mouseenter',
-        attr: {
-          fill: { color: '#FFFFFF' },
-        },
-      },
-    ],
-  },
+      { condition: 'normal', attr: { fill: { color: '#999999' }, }, },
+      { condition: 'mouseenter', attr: { fill: { color: '#FFFFFF' }, }, }, ], },
   // icon
-  {
-    itemPart: 'icon',
+  { itemPart: 'icon',
     behavior: [
-      {
-        condition: 'normal',
-        attr: {
-          fill: { color: 'black' },
-          stroke: { color: 'black' },
-        },
-      },
-      {
-        condition: 'mouseenter',
-        attr: {
-          fill: { color: 'white' },
-          stroke: { color: 'white' },
-        },
-      },
-    ],
-  },
-]
+      { condition: 'normal', attr: { fill: { color: 'black' }, stroke: { color: 'black' }, }, },
+      { condition: 'mouseenter', attr: { fill: { color: 'white' }, stroke: { color: 'white' }, }, }, ], }, ]
 
 //#endregion
 
@@ -181,7 +92,7 @@ export type ListItemAttr = {
   shortcut?: TitleStyle
 
   behavior?: ItemPartsBehavior
-  condition?: ItemCondition
+  condition?: ListItemCondition
   state?: ItemState
 }
 
@@ -197,7 +108,7 @@ export class listItem extends label {
   /** reaction to external influences */
   behavior: ItemPartsBehavior
   /** condition reflecting effect */
-  condition?: ItemCondition = 'normal'
+  condition?: ListItemCondition = 'normal'
   state?: ItemState = 'active'
 
   /** Path | title, typicaly at the end */
@@ -209,11 +120,11 @@ export class listItem extends label {
     super(attr.label)
 
     this.kind = attr.kind
-
     // check type and adds icon or shortcut to core
     if (this.kind == 'icon') {
       this.suppItem = new Path({ ...attr.icon })
     } else if (this.kind == 'shortcut') {
+      // console.log(attr.shortcut)
       this.suppItem = new title({ ...attr.shortcut })
     }
     attr.suppIndent && (this.suppIndent = attr.suppIndent)
@@ -277,7 +188,7 @@ export class listItem extends label {
    * change the appearance of the element depending on the external influence
    * @param c current condition
    */
-  applyBehavior(c?: ItemCondition) {
+  applyBehavior(c?: ListItemCondition) {
     !c && (c = this.condition)
 
     getB(this, this.background, c, 'background')
@@ -296,11 +207,14 @@ export class listItem extends label {
 const getB = (
   i: listItem,
   rop: any,
-  c?: ItemCondition,
+  c?: ListItemCondition,
   pt?: ItemPartType
 ) => {
   let bf = i.behavior.find((el) => el.itemPart == pt)
+
   let dbc = bf && bf.behavior.find((el) => el.condition == c)
+
+  // ItemDefaultBehavior
   dbc &&
     (rop.fill({ ...dbc.attr.fill }),
     rop.stroke({ ...dbc.attr.stroke }))

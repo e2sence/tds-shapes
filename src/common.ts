@@ -86,11 +86,16 @@ export type ItemIconStyle = {
   stroke: StrokeData
 }
 
-export type ItemType = 'general' | 'icon' | 'shortcut'
+export type ItemType = 'general' | 'icon' | 'shortcut' | 'separtor'
 
 export type ItemState = 'active' | 'inactive'
 
 export type Position = { x: number; y: number }
+
+export const iconPath = {
+  rightChevron:
+    'M6.8 6C6.8 5.8 6.7 5.7 6.6 5.5L1.1 0.2C1 0.1 0.8 0 0.6 0 0.3 0 0 0.3 0 0.6 0 0.8 0.1 1 0.2 1.1L5.2 6 0.2 10.9C0.1 11 0 11.2 0 11.4 0 11.7 0.3 12 0.6 12 0.8 12 1 11.9 1.1 11.8L6.6 6.5C6.7 6.3 6.8 6.2 6.8 6Z',
+}
 
 /** simple ID string for object identification
  * @returns string like 'T40fbb0e49f748c'

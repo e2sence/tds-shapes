@@ -41,30 +41,26 @@ export class label extends G {
     attr.indents ??= [0, 0, 0, 0]
     this.indents = attr.indents
 
-    attr.title instanceof title
-      ? Object.assign(attr.title, this.title)
-      : (this.title = new title(attr.title))
-
-    if (attr.background && !this.rules.includes('none')) {
-      attr.background instanceof background
-        ? Object.assign(attr.background, this.background)
-        : (this.background = new background(
-            attr.background
-          ))
+    if (attr.title instanceof title) {
+      Object.assign(attr.title, this.title)
+    } else {
+      this.title = new title(attr.title)
     }
 
-    applyRules(
-      this.title,
-      this.background,
-      this.rules,
-      this.indents
-    )
+    if (attr.background && !this.rules.includes('none')) {
+      if (attr.background instanceof background) {
+        Object.assign(attr.background, this.background)
+      } else {
+        this.background = new background(attr.background)
+      }
+    }
+
+    applyRules(this.title, this.background, this.rules, this.indents)
 
     this.background && this.add(this.background)
     this.add(this.title)
 
-    attr.position &&
-      this.move(attr.position.x, attr.position.y)
+    attr.position && this.move(attr.position.x, attr.position.y)
   }
 
   // value operations
@@ -84,21 +80,13 @@ export class label extends G {
    * @param r new rules
    * @param i new indents
    */
-  applyRules(
-    r: TitleToBackgroundRules[],
-    i: Indents = [0, 0, 0, 0]
-  ) {
+  applyRules(r: TitleToBackgroundRules[], i: Indents = [0, 0, 0, 0]) {
     // store rules and indents
     this.rules = []
     this.rules.push(...r)
     this.indents = i
 
-    applyRules(
-      this.title,
-      this.background,
-      this.rules,
-      this.indents
-    )
+    applyRules(this.title, this.background, this.rules, this.indents)
   }
 }
 

@@ -1,4 +1,5 @@
 import { StrokeData, Line } from '@svgdotjs/svg.js'
+import { ItemType } from './common'
 
 /**
  * @param start start position {x: , y:}
@@ -11,6 +12,7 @@ export type ISeparatorTemplate = {
   length: number
   stroke: StrokeData
   end?: { x: number; y: number }
+  kind?: ItemType
 }
 
 /**
