@@ -6,12 +6,19 @@ import {
   iconPath,
   Indents,
   ItemIconStyle,
+  ItemState,
   ItemType,
+  ListAttrDefault,
   TitleStyle,
 } from './common'
 import { label, LabelAttr } from './label'
-import { ItemPartsBehavior, listItem } from './listItem'
+import {
+  ItemPartsBehavior,
+  listItem,
+  ListItemCondition,
+} from './listItem'
 import { ISeparatorTemplate, separator } from './separator'
+import { title } from './title'
 
 // single item description
 export type ListItemInstanceAttr = {
@@ -36,91 +43,28 @@ export type ListAttr = {
 
   itemWidth: number
   itemsStyle: LabelAttr
+  titleStyle?: TitleStyle
   itemsBehavior?: ItemPartsBehavior
   // prettier-ignore
-  itemsInstances?: { kind: ItemType, str: string, icon?: ItemIconStyle, shortcut?: TitleStyle, persStyle?: TitleStyle}[]
+  itemsInstances?: { kind: ItemType, str: string, state: ItemState, condition: ListItemCondition, icon?: ItemIconStyle, shortcut?: TitleStyle, persStyle?: TitleStyle}[]
   separatorsInstances?: { order: number; value: ISeparatorTemplate }[]
 }
 
-export const ListAttrDefault: ListAttr = {
-  //
-  body: {
-    width: 206,
-    height: 200,
-    fill: { color: '#EEEEEE' },
-    stroke: { color: '#D2D2D2', width: 1 },
-    radius: 10,
-    position: { x: 300, y: 300 },
-  },
-  autoHeight: true,
-  indents: [5, 8, 5, 8],
-  subItemIndents: {
-    item: 0,
-    separator: 5,
-    itemIcon: 20,
-    itemShortcut: 20,
-  },
-
-  //
-  itemWidth: 190,
-  itemsStyle: {
-    title: {
-      value: '',
-      font: 'Menlo',
-      fontWeight: 'normal',
-      size: 12,
-      fill: { color: 'black' },
-      position: { x: 0, y: 0 },
-    },
-    backgroundRule: ['indent'],
-    background: {
-      width: 50,
-      height: 20,
-      fill: { color: '#EEEEEE' },
-      stroke: { color: '#EEEEEE' },
-      radius: 4,
-      position: { x: 0, y: 0 },
-    },
-    indents: [8, 2, 8, 2],
-    position: { x: 0, y: 0 },
-  },
-
-  // prettier-ignore
-  itemsBehavior: [{
-      itemPart: 'background', behavior: [
-        //    { condition: 'normal', attr: { fill: { color: 'red' }, stroke: { color: 'blue', width: 2 } } },
-        //    { condition: 'mouseenter', attr: {fill: {color: 'grey'}, stroke: { color: 'black', width: 2}}}
-      ]}, {
-      itemPart: 'shotrcut', behavior: [
-        //    {condition: 'mouseenter', attr: {fill: { color : 'red'}}},
-        //    {},   
-          ]
-      }],
-
-  // prettier-ignore
-  itemsInstances: [
-    { kind: 'general', str: 'File'},
-    { kind: 'general', str: 'Edit' },
-    { kind: 'shortcut', str: 'Window', shortcut: {value: 'cmd + X', font: 'Menlo', fontWeight: 'normal', size: 12, position: {x: 0, y: 0}, fill: {color: 'green'}}},
-    { kind: 'general', str: 'View' },
-    { kind: 'icon', str: 'Magic line', icon: { d: iconPath.rightChevron, fill: {color: 'black'}, stroke: {color: 'black'}}},
-    { kind: 'general', str: 'Terminal'},
-    { kind: 'general', str: 'Wait a minutes...'},
-    ],
-  // prettier-ignore
-  separatorsInstances: [
-      {order: 2, value: {start: {x: 25, y: 0}, length: 160, stroke: {color: '#D2D2D2'}} },
-      {order: 4, value: {start: {x: 25, y: 0}, length: 160, stroke: {color: '#D2D2D2'}} }
-  ],
-}
-
 export class list extends G {
+  title: title
   body: Rect
-  items: Array<listItem | separator | label> = []
+  items: Array<listItem> = [] //| separator | label> = []
+  separators: Array<separator> = []
 
   constructor(attr: ListAttr = ListAttrDefault) {
     super()
     this.id(Create_ID()).addClass('tds-list')
+
+    // create titile
+    if (attr.titleStyle) {
+      this.title = new title(attr.titleStyle)
+      this.add(this.title)
+    }
 
     // create body rectangle
     this.body = new Rect()
@@ -143,11 +87,12 @@ export class list extends G {
       if (isSep) {
         isSep.value.start.y =
           summHeight + attr.subItemIndents.separator
-        this.items.push(new separator(isSep.value))
+
+        let cs = new separator(isSep.value)
+        this.separators.push(cs)
+        this.add(cs)
         summHeight += attr.subItemIndents.separator * 2
       }
-
-      // base indent
 
       let el
       // get item style
@@ -164,37 +109,53 @@ export class list extends G {
           kind: 'general',
           width: attr.itemWidth,
           behavior: attr.itemsBehavior,
-        }).draggable()
+          condition: ii.condition,
+          state: ii.state,
+        })
       }
+
       if (ii.kind == 'shortcut') {
         el = new listItem({
           label: is,
           kind: 'shortcut',
           width: attr.itemWidth,
-          suppIndent: 20,
+          suppIndent: attr.subItemIndents.itemShortcut,
           shortcut: ii.shortcut,
           behavior: attr.itemsBehavior,
-        }).draggable()
+          condition: ii.condition,
+          state: ii.state,
+        })
       }
+
       if (ii.kind == 'icon') {
         el = new listItem({
           label: is,
           kind: 'icon',
           width: attr.itemWidth,
-          suppIndent: 20,
+          suppIndent: attr.subItemIndents.itemIcon,
           icon: ii.icon,
           behavior: attr.itemsBehavior,
-        }).draggable()
+          condition: ii.condition,
+          state: ii.state,
+        })
       }
 
       // adds element to list items collection
       this.items.push(el)
       // increase overal items height
       summHeight +=
-        el.title.bbox().height + el.indents[1] + el.indents[3]
+        el.title.bbox().height +
+        el.indents[1] +
+        el.indents[3] +
+        attr.subItemIndents.item
     })
 
-    this.items.forEach((i) => this.add(i))
+    this.items.forEach((i) => {
+      i.on('mousedown', () => {
+        this.dispatch('tds-list-mousedown', i)
+      })
+      this.add(i)
+    })
 
     // set auto height
     attr.autoHeight && this.body.height(attr.indents[3] + summHeight)

@@ -47,14 +47,15 @@ export const ItemDefaultBehavior: ItemPartsBehavior = [
     behavior: [
       { condition: 'normal', attr: { fill: { color: '#EEEEEE' }, stroke: { color: 'transparent', width: 1 },},},
       { condition: 'mouseenter', attr: { fill: { color: '#00AAFF' }, stroke: { color: '#00AAFF', width: 1 }, }, },
+      { condition: 'highlight', attr: { fill: { color: '#00AAFF' }, stroke: { color: '#00AAFF', width: 1 }, }, },
       { condition: 'onclick', attr: { fill: { color: '#999999' }, stroke: { color: '#999999', width: 1 }, }, },
-      { condition: 'inactive', attr: { fill: { color: '#999999' }, stroke: { color: '#999999', width: 1 }, }, }, ], },
+      { condition: 'inactive', attr: { fill: { color: '#EEEEEE' }, stroke: { color: '#transparent', width: 1 }, }, }, ], },
   // label
   { itemPart: 'title',
     behavior: [
       { condition: 'normal', attr: { fill: { color: 'black' } }, },
       { condition: 'mouseenter', attr: { fill: { color: 'white' } }, },
-      { condition: 'inactive',  attr: { fill: { color: '#F2F2F2' } }, }, ],
+      { condition: 'inactive',  attr: { fill: { color: '#999999' } }, }, ],
   },
   // foreground
   { itemPart: 'foreground',
@@ -152,7 +153,7 @@ export class listItem extends label {
 
     // set state and condition
     this.condition = attr.condition ? attr.condition : 'normal'
-    this.state = attr.state ? attr.state : 'active'
+    this.state = attr.state ? attr.state : 'inactive'
 
     // finally set how it will look )
     attr.behavior
@@ -166,22 +167,26 @@ export class listItem extends label {
 
     // handle mouseenter / mouseleave and mousedown
     this.foreground.on('mouseenter', () => {
-      this.condition != 'highlight'
+      this.condition != 'highlight' && this.state != 'inactive'
         ? (this.condition = 'mouseenter')
         : 0
-      // this.front()
+      this.front()
       this.applyBehavior()
     })
     this.foreground.on('mouseleave', () => {
-      this.condition != 'highlight' ? (this.condition = 'normal') : 0
+      this.condition != 'highlight' && this.state != 'inactive'
+        ? (this.condition = 'normal')
+        : 0
       this.applyBehavior()
     })
     this.foreground.on('mousedown', () => {
-      this.condition = 'onclick'
+      this.condition != 'highlight' && this.state != 'inactive'
+        ? (this.condition = 'onclick')
+        : 0
       this.applyBehavior()
     })
     this.foreground.on('mouseup', () => {
-      this.condition != 'highlight'
+      this.condition != 'highlight' && this.state != 'inactive'
         ? (this.condition = 'mouseenter')
         : 0
       this.front()

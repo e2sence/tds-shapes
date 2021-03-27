@@ -1,4 +1,5 @@
 import { Element, FillData, StrokeData } from '@svgdotjs/svg.js'
+import { ListAttr } from './list'
 
 export type StyleSize = 'xxs' | 'xs' | 's' | 'm' | 'l' | 'xl' | 'xxl'
 
@@ -178,4 +179,79 @@ export const objectMerge = (s: any, t: any): void => {
       !t[prop] ? (t[prop] = s[prop]) : 0
     }
   })
+}
+
+/**
+ * list config example
+ */
+export const ListAttrDefault: ListAttr = {
+  //
+  body: {
+    width: 206,
+    height: 200,
+    fill: { color: '#EEEEEE' },
+    stroke: { color: '#D2D2D2', width: 1 },
+    radius: 10,
+    position: { x: 300, y: 300 },
+  },
+  autoHeight: true,
+  indents: [5, 8, 5, 8],
+  subItemIndents: {
+    item: 0,
+    separator: 5,
+    itemIcon: 20,
+    itemShortcut: 20,
+  },
+
+  //
+  itemWidth: 190,
+  itemsStyle: {
+    title: {
+      value: '',
+      font: 'Menlo',
+      fontWeight: 'normal',
+      size: 12,
+      fill: { color: 'black' },
+      position: { x: 0, y: 0 },
+    },
+    backgroundRule: ['indent'],
+    background: {
+      width: 50,
+      height: 20,
+      fill: { color: '#EEEEEE' },
+      stroke: { color: '#EEEEEE' },
+      radius: 4,
+      position: { x: 0, y: 0 },
+    },
+    indents: [8, 2, 8, 2],
+    position: { x: 0, y: 0 },
+  },
+
+  // prettier-ignore
+  itemsBehavior: [{
+      itemPart: 'background', behavior: [
+        //    { condition: 'normal', attr: { fill: { color: 'red' }, stroke: { color: 'blue', width: 2 } } },
+        //    { condition: 'mouseenter', attr: {fill: {color: 'grey'}, stroke: { color: 'black', width: 2}}}
+      ]}, {
+      itemPart: 'shotrcut', behavior: [
+        //    {condition: 'mouseenter', attr: {fill: { color : 'red'}}},
+        //    {},   
+          ]
+      }],
+
+  // prettier-ignore
+  itemsInstances: [
+    { kind: 'general', str: 'File', state: 'active', condition: 'normal' },
+    { kind: 'general', str: 'Edit', state: 'active', condition: 'normal' },
+    { kind: 'shortcut', str: 'Window', state: 'active', condition: 'normal', shortcut: {value: 'cmd + X', font: 'Menlo', fontWeight: 'normal', size: 12, position: {x: 0, y: 0}, fill: {color: 'green'}}},
+    { kind: 'general', str: 'View', state: 'active', condition: 'normal' },
+    { kind: 'icon', str: 'Magic line', state: 'active', condition: 'normal', icon: { d: iconPath.rightChevron, fill: {color: 'black'}, stroke: {color: 'black'}}},
+    { kind: 'general', str: 'Terminal', state: 'active', condition: 'normal'},
+    { kind: 'general', str: 'Wait a minutes...', state: 'active', condition: 'normal'},
+    ],
+  // prettier-ignore
+  separatorsInstances: [
+      {order: 2, value: {start: {x: 25, y: 0}, length: 160, stroke: {color: '#D2D2D2'}} },
+      {order: 4, value: {start: {x: 25, y: 0}, length: 160, stroke: {color: '#D2D2D2'}} }
+  ],
 }
