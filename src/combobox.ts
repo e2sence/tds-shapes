@@ -129,6 +129,7 @@ export class combobox extends G {
 
     // highlight current selection
     this.curntSelection.condition = 'highlight'
+    this.curntSelection.applyBehavior()
 
     // move selection to its initial position
     this.curntSelection.dmove(0, this.pdy)
