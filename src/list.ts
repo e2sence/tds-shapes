@@ -15,8 +15,10 @@ import { label, LabelAttr } from './label'
 import {
   ItemPartsBehavior,
   listItem,
+  ListItemAttr,
   ListItemCondition,
 } from './listItem'
+import { listItemGrouped } from './listItemGrouped'
 import { ISeparatorTemplate, separator } from './separator'
 import { title } from './title'
 
@@ -46,7 +48,7 @@ export type ListAttr = {
   titleStyle?: TitleStyle
   itemsBehavior?: ItemPartsBehavior
   // prettier-ignore
-  itemsInstances?: { kind: ItemType, str: string, state: ItemState, condition: ListItemCondition, icon?: ItemIconStyle, shortcut?: TitleStyle, persStyle?: TitleStyle}[]
+  itemsInstances?: { kind: ItemType, str: string, state: ItemState, condition: ListItemCondition, icon?: ItemIconStyle, shortcut?: TitleStyle, persStyle?: TitleStyle, list?: ListAttr}[]
   separatorsInstances?: { order: number; value: ISeparatorTemplate }[]
 }
 
@@ -138,6 +140,31 @@ export class list extends G {
           condition: ii.condition,
           state: ii.state,
         })
+      }
+
+      if (ii.kind == 'group') {
+        let lia: ListItemAttr = {
+          label: is,
+          kind: 'icon',
+          width: attr.itemWidth,
+          suppIndent: attr.subItemIndents.itemIcon,
+          icon: ii.icon,
+          behavior: attr.itemsBehavior,
+          condition: ii.condition,
+          state: ii.state,
+        }
+        let la: ListAttr = ii.list
+        el = new listItemGrouped(lia, la)
+        // el = new listItem({
+        //   label: is,
+        //   kind: 'icon',
+        //   width: attr.itemWidth,
+        //   suppIndent: attr.subItemIndents.itemIcon,
+        //   icon: ii.icon,
+        //   behavior: attr.itemsBehavior,
+        //   condition: ii.condition,
+        //   state: ii.state,
+        // })
       }
 
       // adds element to list items collection

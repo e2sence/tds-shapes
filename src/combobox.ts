@@ -1,5 +1,5 @@
 import { G } from '@svgdotjs/svg.js'
-import { TitleStyle } from './common'
+import { Create_ID, TitleStyle } from './common'
 import { list, ListAttr } from './list'
 import { listItem } from './listItem'
 import { title } from './title'
@@ -14,24 +14,27 @@ export class combobox extends G {
 
   pdy: number = 0
 
-  constructor(
-    attr: ListAttr,
-    curntSelection: number,
-    cbt?: TitleStyle
-  ) {
+  constructor(attr: {
+    listAttr: ListAttr
+    selection?: number
+    title?: TitleStyle
+    autoshow?: boolean
+    autohide?: boolean
+  }) {
     super()
+    this.id(Create_ID()).addClass('tds-combobox')
 
     // set title
-    cbt && (this.title = new title(cbt))
+    attr.title && (this.title = new title(attr.title))
 
     // set initial state
     this.state = 'openend'
 
     // create list
-    this.list = new list({ ...attr })
+    this.list = new list({ ...attr.listAttr })
 
     // set selection
-    this.curntSelection = this.list.items[curntSelection]
+    this.curntSelection = this.list.items[attr.selection]
 
     // add list to instance
     this.add(this.list)
@@ -42,13 +45,15 @@ export class combobox extends G {
     // add title
     this.add(this.title)
 
-    this.on('mouseleave', () => {
-      this.state == 'openend' && this.switchState()
-    })
+    attr.autohide &&
+      this.on('mouseleave', () => {
+        this.state == 'openend' && this.switchState()
+      })
 
-    this.on('mouseenter', () => {
-      this.state == 'closed' && this.switchState()
-    })
+    attr.autoshow &&
+      this.on('mouseenter', () => {
+        this.state == 'closed' && this.switchState()
+      })
 
     this.list.items.forEach((el) => {
       el.on('mousedown', () => {

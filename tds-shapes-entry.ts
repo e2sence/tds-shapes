@@ -11,5 +11,8 @@ export * from './src/textbox'
 export * from './src/slider'
 
 export * from './src/listItem'
+export * from './src/listItemGrouped'
+
 export * from './src/list'
+
 export * from './src/combobox'
