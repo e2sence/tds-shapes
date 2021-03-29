@@ -60,6 +60,7 @@ export class combobox extends G {
         this.curntSelection = el
         this.switchState()
       })
+
       // for avoid stroke overlapping
       el.on('mouseenter', () => {
         this.curntSelection.front()
@@ -117,16 +118,18 @@ export class combobox extends G {
     // move selection to top
     this.curntSelection.addTo(this).front()
 
+    // store position
     let tp = this.list.items[0].background.bbox()
-
     let dy = this.curntSelection.background.bbox().y - tp.y
-
     this.pdy = dy
 
+    // uprise selection
     this.curntSelection.move(tp.x, tp.y)
 
+    // hide list
     this.list.hide()
 
+    // reset condition for hiden items
     this.list.items.forEach((el) => {
       el.condition = 'normal'
       el.applyBehavior()

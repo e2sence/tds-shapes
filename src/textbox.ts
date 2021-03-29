@@ -21,72 +21,107 @@ export class textbox extends label {
 
     this.inputType = attr.inputType
 
-    this.on('dblclick', (ev: MouseEvent) => {
+    this.on('dblclick', () => {
+      changeHandler(this)
+    })
+
+    let tf = 0
+    this.on('touchstart', (ev: TouchEvent) => {
+      // changeHandler(this)
+      tf = 1
+
+      setTimeout(() => {
+        tf == 1 && changeHandler(this)
+      }, 1000)
+
+      console.log('touchstart')
+    })
+
+    this.on('touchend', (ev: TouchEvent) => {
+      // changeHandler(this)
+      tf = 0
+
+      console.log('touchend')
+    })
+
+    this.on('touchcancel', (ev: TouchEvent) => {
+      // changeHandler(this)
+      console.log('touchcancel')
+    })
+
+    this.on('touchmove', (ev: TouchEvent) => {
+      // changeHandler(this)
+      tf = 0
+      console.log('touchmove')
+    })
+
+    function changeHandler(tb: textbox) {
       // id for foreing element
       let frid = Create_ID()
 
       // create foreign object
-      this.input = this.root()
+      tb.input = tb
+        .root()
         .element('foreignObject')
         .attr({
-          width: this.width() + 20,
-          height: this.height() + 20,
-          x: this.title.bbox().x - 3,
-          y: this.title.bbox().y - 3,
+          width: tb.width() + 20,
+          height: tb.height() + 20,
+          x: tb.title.bbox().x - 3,
+          y: tb.title.bbox().y - 3,
           id: frid,
         })
 
       // value to transfer to input
-      let _v = this.title.value
+      let _v = tb.title.value
       if (_v == '\u2800') _v = ''
 
       // DOM string of input
-      let inputHTML = `<input id="${this.inputID}" 
+      let inputHTML = `<input id="${tb.inputID}" 
                                 class="txtinput"
                                 value="${_v}" 
-                                type="${this.inputType}"
+                                type="${tb.inputType}"
                                 size="1" 
                                 style="width:100%;">
                         </input>`
 
       // show input with new data
-      this.input.node.innerHTML = inputHTML
-      this.setInputVisibility(true)
-      this.dispatch('tds-textbox-changingStart', this)
+      tb.input.node.innerHTML = inputHTML
+      tb.setInputVisibility(true)
+      tb.dispatch('tds-textbox-changingStart', tb)
 
       // handle loose focus
-      this.input.node.addEventListener(
+      tb.input.node.addEventListener(
         'blur',
         () => {
-          this.setInputVisibility(false)
-          this.input.node.remove()
+          tb.setInputVisibility(false)
+          tb.input.node.remove()
         },
         true
       )
 
       // handle keyboard
-      this.input.node.addEventListener(
+      tb.input.node.addEventListener(
         'keydown',
         (ev: KeyboardEvent) => {
           if (ev.key == 'Enter') {
-            let _v = this.getInput().value
+            let _v = tb.getInput().value
 
             _v !== ''
-              ? (this.value = _v)
-              : this.inputType == 'text'
-              ? (this.value = '\u2800')
-              : (this.value = Number(0).toString())
+              ? (tb.value = _v)
+              : tb.inputType == 'text'
+              ? (tb.value = '\u2800')
+              : (tb.value = Number(0).toString())
 
-            this.setInputVisibility(false)
-            this.dispatch('tds-textbox-changingEnd', this)
+            tb.setInputVisibility(false)
+            tb.dispatch('tds-textbox-changingEnd', tb)
           }
           if (ev.key == 'Escape') {
-            this.setInputVisibility(false)
+            tb.setInputVisibility(false)
           }
         },
         true
       )
-    })
+    }
   }
 
   reset() {
@@ -95,9 +130,7 @@ export class textbox extends label {
 
   /** get input as HTMLInputElement */
   getInput() {
-    return document.getElementById(
-      this.inputID
-    ) as HTMLInputElement
+    return document.getElementById(this.inputID) as HTMLInputElement
   }
 
   /** hide/ show input field */
@@ -106,10 +139,7 @@ export class textbox extends label {
 
     if (isVisible) {
       this.hide()
-      this.input.node.setAttribute(
-        'style',
-        'display: inline-block;'
-      )
+      this.input.node.setAttribute('style', 'display: inline-block;')
       // set focus and move cursor to end
       el.focus()
       // if input type is 'text'
@@ -119,10 +149,7 @@ export class textbox extends label {
     } else {
       this.show()
       if (this.input)
-        this.input?.node?.setAttribute(
-          'style',
-          'display: none;'
-        )
+        this.input?.node?.setAttribute('style', 'display: none;')
     }
   }
 }

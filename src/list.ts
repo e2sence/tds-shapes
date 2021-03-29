@@ -3,7 +3,6 @@ import { G } from '@svgdotjs/svg.js'
 import {
   BackgroundStyle,
   Create_ID,
-  iconPath,
   Indents,
   ItemIconStyle,
   ItemState,
@@ -47,8 +46,18 @@ export type ListAttr = {
   itemsStyle: LabelAttr
   titleStyle?: TitleStyle
   itemsBehavior?: ItemPartsBehavior
-  // prettier-ignore
-  itemsInstances?: { kind: ItemType, str: string, state: ItemState, condition: ListItemCondition, icon?: ItemIconStyle, shortcut?: TitleStyle, persStyle?: TitleStyle, list?: ListAttr}[]
+
+  itemsInstances?: {
+    kind: ItemType
+    str: string
+    state: ItemState
+    condition: ListItemCondition
+    icon?: ItemIconStyle
+    shortcut?: TitleStyle
+    persStyle?: TitleStyle
+    list?: ListAttr
+  }[]
+
   separatorsInstances?: { order: number; value: ISeparatorTemplate }[]
 }
 
@@ -155,16 +164,6 @@ export class list extends G {
         }
         let la: ListAttr = ii.list
         el = new listItemGrouped(lia, la)
-        // el = new listItem({
-        //   label: is,
-        //   kind: 'icon',
-        //   width: attr.itemWidth,
-        //   suppIndent: attr.subItemIndents.itemIcon,
-        //   icon: ii.icon,
-        //   behavior: attr.itemsBehavior,
-        //   condition: ii.condition,
-        //   state: ii.state,
-        // })
       }
 
       // adds element to list items collection
