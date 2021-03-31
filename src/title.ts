@@ -21,8 +21,8 @@ const createText = (attr: TitleStyle): Text => {
   title.attr({
     fill: attr.fill.color,
     'fill-opacity': attr.fill.opacity,
-    x: attr.position.x,
-    y: attr.position.y + ts.height - ts.y2,
+    x: attr.position?.x,
+    y: attr.position?.y + ts.height - ts.y2,
   })
 
   return title

@@ -16,3 +16,5 @@ export * from './src/listItemGrouped'
 export * from './src/list'
 
 export * from './src/combobox'
+
+export * from './src/mitem'

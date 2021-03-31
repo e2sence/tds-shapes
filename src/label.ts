@@ -24,6 +24,7 @@ export type LabelAttr = {
   background?: background | BackgroundStyle
   indents?: Indents
   position?: Position
+  widthFactor?: number
 }
 
 export class label extends G {
@@ -31,12 +32,16 @@ export class label extends G {
   background: background
   rules: TitleToBackgroundRules[] = []
   indents: Indents
+  widthFactor: number
 
   constructor(attr: LabelAttr) {
     super()
     this.id(Create_ID()).addClass('tds-label')
+
     attr.backgroundRule ??= ['none']
     this.rules.push(...attr.backgroundRule)
+
+    attr.widthFactor && (this.widthFactor = attr.widthFactor)
 
     attr.indents ??= [0, 0, 0, 0]
     this.indents = attr.indents
@@ -55,7 +60,13 @@ export class label extends G {
       }
     }
 
-    applyRules(this.title, this.background, this.rules, this.indents)
+    applyRules(
+      this.title,
+      this.background,
+      this.rules,
+      this.indents,
+      this.widthFactor
+    )
 
     this.background && this.add(this.background)
     this.add(this.title)
@@ -86,7 +97,13 @@ export class label extends G {
     this.rules.push(...r)
     this.indents = i
 
-    applyRules(this.title, this.background, this.rules, this.indents)
+    applyRules(
+      this.title,
+      this.background,
+      this.rules,
+      this.indents,
+      this.widthFactor
+    )
   }
 }
 
@@ -97,12 +114,14 @@ export class label extends G {
  * @param b background
  * @param r array of rules from TitleToBackgroundRules
  * @param i indents array [0,0,0,0] by default
+ * @param wf width factor
  */
 const applyRules = (
   t: Element,
   b: Element,
   r: TitleToBackgroundRules[],
-  i?: Indents //| { sp: Position; tp: Position }
+  i?: Indents, //| { sp: Position; tp: Position }
+  wf?: number
 ): void => {
   r.forEach((rule) => {
     switch (rule) {
@@ -124,6 +143,11 @@ const applyRules = (
         break
       default:
         break
+    }
+    // check factor
+    if (wf) {
+      let rw = b.width() - (b.width() % wf) + wf
+      b.width(rw)
     }
   })
 }

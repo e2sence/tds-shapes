@@ -1,4 +1,6 @@
-import { Element, FillData, StrokeData } from '@svgdotjs/svg.js'
+import { Svg } from '@svgdotjs/svg.js'
+import { Circle } from '@svgdotjs/svg.js'
+import { Element, FillData, Line, StrokeData } from '@svgdotjs/svg.js'
 import { ListAttr } from './list'
 
 export type StyleSize = 'xxs' | 'xs' | 's' | 'm' | 'l' | 'xl' | 'xxl'
@@ -31,7 +33,7 @@ export type TitleStyle = {
   fontWeight: FontWeight
   size: number
   fill: FillData
-  position: Position
+  position?: Position
 }
 
 export type BackgroundStyle = {
@@ -40,7 +42,7 @@ export type BackgroundStyle = {
   fill: FillData
   stroke: StrokeData
   radius: number
-  position: Position
+  position?: Position
 }
 
 export type Indents = [
@@ -48,6 +50,17 @@ export type Indents = [
   top: number,
   right: number,
   bottom: number
+]
+
+export type AnchorsMap = [
+  left: [number, number],
+  leftTop: [number, number],
+  top: [number, number],
+  topRight: [number, number],
+  right: [number, number],
+  rightBottom: [number, number],
+  bottom: [number, number],
+  bottomLeft: [number, number]
 ]
 
 export type SliderPayload = {
@@ -188,6 +201,112 @@ export const objectMerge = (s: any, t: any): void => {
       !t[prop] ? (t[prop] = s[prop]) : 0
     }
   })
+}
+
+/** random hex color */
+export const getRandomColor = (): string => {
+  var letters = '0123456789ABCDEF'
+  var color = '#'
+  for (var i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)]
+  }
+  return color
+}
+
+/**
+ * checks if coordinates are in a circle
+ *
+ * @param x x coordinate
+ * @param y y coordinate
+ * @param x1 circle x coordinate
+ * @param y1 circle y coordinate
+ * @param r circle radius
+ */
+export const isPointInCircle = (
+  x: number,
+  y: number,
+  x1: number,
+  y1: number,
+  r: number
+): boolean => {
+  let distance = (x - x1) * (x - x1) + (y - y1) * (y - y1)
+  r *= r
+  return distance < r
+}
+
+/**
+ * distance from point to point (circle center...etc)
+ *
+ * @param x x coordinate
+ * @param y y coordinate
+ * @param x1 circle x coordinate
+ * @param y1 circle y coordinate
+ */
+export const distP = (
+  x: number,
+  y: number,
+  x1: number,
+  y1: number
+): number => {
+  return Math.sqrt((x1 - x) * (x1 - x) + (y1 - y) * (y1 - y))
+}
+
+/** controled, 'auto erase' line from point to point */
+export const createTempLine = (
+  root: Svg,
+  x: number,
+  y: number,
+  x1: number,
+  y1: number,
+  id: string,
+  la?: StrokeData
+) => {
+  root.children().map((el) => {
+    el.hasClass('tds-templine' + id) && el.remove()
+  })
+
+  !la && (la = { color: 'red', width: 1, dasharray: '5 2 5' })
+
+  root.add(
+    new Line()
+      .plot([
+        [x, y],
+        [x1, y1],
+      ])
+      .stroke({
+        color: la.color,
+        width: la.width,
+        dasharray: la.dasharray,
+      })
+      .addClass('tds-templine' + id)
+  )
+}
+
+export const createPinPoint = (
+  root: Svg,
+  x: number,
+  y: number,
+  r: number,
+  id: string,
+  la?: StrokeData,
+  fd?: FillData
+) => {
+  root.children().map((el) => {
+    el.hasClass('tds-pinpoint' + id) && el.remove()
+  })
+
+  !la && (la = { color: 'red', width: 1 })
+  !fd && (fd = { color: 'transparent' })
+
+  root.add(
+    new Circle()
+      .radius(r)
+      .stroke({ ...la })
+      .fill({ ...fd })
+      .cx(x)
+      .cy(y)
+      .addClass('tds-pinpoint' + id)
+  )
 }
 
 /**

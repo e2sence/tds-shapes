@@ -15,8 +15,8 @@ const createRect = (attr: BackgroundStyle): Rect => {
     .stroke(attr.stroke)
     .radius(attr.radius)
     .attr({
-      x: attr.position.x,
-      y: attr.position.y,
+      x: attr.position?.x,
+      y: attr.position?.y,
     })
   return outline
 }
