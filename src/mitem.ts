@@ -57,6 +57,7 @@ export class mitem extends label {
   widthFactor: number
 
   fromFreeDrag: boolean = true
+  snaped: boolean = false
 
   constructor(
     attr: LabelAttr,
@@ -67,18 +68,6 @@ export class mitem extends label {
     this.id(Create_ID()).addClass('tds-mitem')
 
     this.widthFactor = wFactor
-
-    // set outline
-    this.outline = new mitemOutline(outline.border, outline.indents)
-    this.add(this.outline)
-    this.outline.hide()
-    this.on('mouseenter', () => {
-      this.outline.show()
-    })
-    this.on('mouseleave', () => {
-      this.outline.hide()
-    })
-
     // correct width according to widthFactor
     this.correctWidth()
 
@@ -88,6 +77,22 @@ export class mitem extends label {
     let ty = bb.y - (bb.y % this.widthFactor) + attr.indents[3]
     this.move(tx, ty)
 
+    // set outline
+    this.outline = new mitemOutline(outline.border, outline.indents)
+    this.add(this.outline)
+    this.outline.hide()
+    this.on('mouseenter', () => {
+      this.outline.show()
+    })
+    this.on('touchstart', () => {
+      console.log('ts')
+
+      this.outline.show()
+    })
+    this.on('mouseleave', () => {
+      this.outline.hide()
+    })
+
     // correct outline
     this.setOutline()
 
@@ -95,51 +100,63 @@ export class mitem extends label {
       snapHandler(ev, this)
     })
     function snapHandler(ev: CustomEvent, inst: mitem) {
-      let cb = inst.bbox()
-      // find mitem instances
-      inst
-        .parent()
-        .children()
-        .filter(
-          (el: Element) => el.hasClass('tds-mitem') && el != inst
-        )
-        .forEach((el: Element) => {
-          let elb = el.bbox()
-          // get distance to mitems
-          let dist = distP(cb.x, cb.y, elb.x, elb.y)
-          if (dist < MITEM_FRIENDS_ZONE && el instanceof mitem) {
-            // el - mitem in range
-            let can = el.anchors
-            inst.anchors.forEach((this_el: number[]) => {
-              can.forEach((c_el) => {
-                let adist = distP(
-                  this_el[0],
-                  this_el[1],
-                  c_el[0],
-                  c_el[1]
-                )
-                // turn on snap to grid mode
-                if (adist < inst.widthFactor) {
-                  //   let dx = this_el[0] - c_el[0]
-                  //   let dy = this_el[1] - c_el[1]
-                  //   let q = inst.getQuater(dx, dy)
-                  //   console.log(`${dx} ${dy} ${q}`)
-
-                  ev.preventDefault()
-                  const { box } = ev.detail
-
-                  ev.detail.handler.el.move(
-                    box.x - (box.x % inst.widthFactor),
-                    box.y - (box.y % inst.widthFactor)
+      //
+      if (!inst.snaped) {
+        let cb = inst.bbox()
+        // find mitem instances
+        inst
+          .parent()
+          .children()
+          .filter(
+            (el: Element) => el.hasClass('tds-mitem') && el != inst
+          )
+          .forEach((el: Element) => {
+            let elb = el.bbox()
+            // get distance to mitems
+            let dist = distP(cb.x, cb.y, elb.x, elb.y)
+            if (dist < MITEM_FRIENDS_ZONE && el instanceof mitem) {
+              // el - mitem in range
+              let can = el.anchors
+              inst.anchors.forEach((this_el: number[]) => {
+                can.forEach((c_el) => {
+                  let adist = distP(
+                    this_el[0],
+                    this_el[1],
+                    c_el[0],
+                    c_el[1]
                   )
+                  // turn on snap to grid mode
+                  if (adist < inst.widthFactor) {
+                    let dx = this_el[0] - c_el[0]
+                    let dy = this_el[1] - c_el[1]
+                    let q = inst.getQuater(dx, dy)
+                    console.log(q)
 
-                  //   inst.fromFreeDrag = false
-                  return true
-                }
+                    ev.preventDefault()
+                    const { box } = ev.detail
+
+                    if (!inst.snaped) {
+                      inst.move(
+                        box.x - (box.x % inst.widthFactor),
+                        box.y - (box.y % inst.widthFactor)
+                      )
+                      inst.snaped = true
+                    }
+
+                    return true
+                  }
+                })
               })
-            })
-          }
-        })
+            }
+          })
+      } else {
+        ev.preventDefault()
+        const { box } = ev.detail
+        inst.move(
+          box.x - (box.x % inst.widthFactor),
+          box.y - (box.y % inst.widthFactor)
+        )
+      }
     }
 
     this.on('dragend', () => {
@@ -150,6 +167,7 @@ export class mitem extends label {
         box.x - (box.x % this.widthFactor),
         box.y - (box.y % this.widthFactor)
       )
+      this.snaped = false
       //   } else {
       //     this.fromFreeDrag = true
       //   }
