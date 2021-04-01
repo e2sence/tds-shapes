@@ -35,7 +35,7 @@ export class title extends Text {
   constructor(attr: TitleStyle) {
     super()
     Object.assign(this, createText(attr))
-    this.id(Create_ID()).addClass('tds-background')
+    this.id(Create_ID()).addClass('tds-title')
   }
 
   // value operations
