@@ -28,7 +28,11 @@ import {
 import { label } from './label'
 import { textbox } from './textbox'
 
-const tickKindOrder: TickKind[] = ['main', 'half', 'subhalf']
+const tickKindOrder: TickKind[] = [
+  'main',
+  'half',
+  'subhalf',
+]
 
 type tpResult = {
   main: number[]
@@ -93,7 +97,9 @@ export class slider extends G {
 
     // ticks storage
     attr.ticks && (this.ticks = attr.ticks)
-    this.ticksGroup.id(Create_ID()).addClass('tds-ticksgroup')
+    this.ticksGroup
+      .id(Create_ID())
+      .addClass('tds-ticksgroup')
     this.add(this.ticksGroup)
 
     this.id(Create_ID()).addClass('tds-slider')
@@ -118,7 +124,8 @@ export class slider extends G {
       .add(this.pin)
       .add(this.valueBox)
 
-    if (this.sliderType == 'twostate') this.valueBox.remove()
+    if (this.sliderType == 'twostate')
+      this.valueBox.remove()
 
     // set pin to value
     this.value = this.payload.value
@@ -329,7 +336,10 @@ export class slider extends G {
    */
   private setFiller(rb: Box, or: SliderOrientation) {
     if (or == 'vertical') {
-      this.filler.move(this.pin.cx() - rb.width / 2, this.pin.cy())
+      this.filler.move(
+        this.pin.cx() - rb.width / 2,
+        this.pin.cy()
+      )
       this.filler.height(rb.y2 - this.pin.cy())
     } else if (or === 'horizontal') {
       this.filler.width(this.pin.cx() - rb.x)
@@ -443,15 +453,21 @@ export class slider extends G {
     tickKindOrder.forEach((el) => {
       if (t) {
         if (t[el]) {
-          let count = Math.floor((p.max - p.min) / t[el].step)
+          let count = Math.floor(
+            (p.max - p.min) / t[el].step
+          )
 
           // distance between ticks
           let len =
-            or == 'horizontal' ? rb.width / count : rb.height / count
+            or == 'horizontal'
+              ? rb.width / count
+              : rb.height / count
 
           for (let i = 0; i < count + 1; i++) {
             let r =
-              or == 'horizontal' ? rb.x + len * i : rb.y2 - len * i
+              or == 'horizontal'
+                ? rb.x + len * i
+                : rb.y2 - len * i
 
             switch (el) {
               case 'main':
@@ -509,7 +525,8 @@ export class slider extends G {
         if (or == 'vertical') {
           let verCor = cel - noUseLine.bbox().h / 2
 
-          sd == 'down' && noUseLine.move(rb.x2 - rb.width / 2, verCor)
+          sd == 'down' &&
+            noUseLine.move(rb.x2 - rb.width / 2, verCor)
 
           sd == 'up' &&
             noUseLine.move(

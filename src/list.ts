@@ -10,7 +10,7 @@ import {
   ListAttrDefault,
   TitleStyle,
 } from './common'
-import { label, LabelAttr } from './label'
+import { LabelAttr } from './label'
 import {
   ItemPartsBehavior,
   listItem,
@@ -32,6 +32,7 @@ export type ListItemInstanceAttr = {
 
 // list overal description
 export type ListAttr = {
+  position?: { x: number; y: number }
   body: BackgroundStyle
   autoHeight?: boolean
   indents: Indents
@@ -58,7 +59,10 @@ export type ListAttr = {
     list?: ListAttr
   }[]
 
-  separatorsInstances?: { order: number; value: ISeparatorTemplate }[]
+  separatorsInstances?: {
+    order: number
+    value: ISeparatorTemplate
+  }[]
 }
 
 export class list extends G {
@@ -84,20 +88,26 @@ export class list extends G {
       .fill({ ...attr.body.fill })
       .stroke({ ...attr.body.stroke })
       .radius(attr.body.radius)
+      .x(attr.position.x)
+      .y(attr.position.y)
     this.add(this.body)
 
     // create items
     let summHeight = 0
     attr.itemsInstances.forEach((ii, num) => {
+      // add top indent to fist item
       num == 0 && (summHeight += attr.indents[1])
 
       // check separator
-      let isSep = attr.separatorsInstances.find(
+      let isSep = attr.separatorsInstances?.find(
         (el) => el.order == num
       )
       if (isSep) {
         isSep.value.start.y =
-          summHeight + attr.subItemIndents.separator
+          summHeight +
+          attr.subItemIndents.separator +
+          attr.position.y
+        isSep.value.start.x += attr.position.x
 
         let cs = new separator(isSep.value)
         this.separators.push(cs)
@@ -111,8 +121,8 @@ export class list extends G {
       // set string
       is.title.value = ii.str
       // set position
-      is.position.y = summHeight
-      is.position.x = attr.indents[0]
+      is.position.y = summHeight + attr.position.y
+      is.position.x = attr.indents[0] + attr.position.x
 
       if (ii.kind == 'general') {
         el = new listItem({
@@ -184,6 +194,7 @@ export class list extends G {
     })
 
     // set auto height
-    attr.autoHeight && this.body.height(attr.indents[3] + summHeight)
+    attr.autoHeight &&
+      this.body.height(attr.indents[3] + summHeight)
   }
 }

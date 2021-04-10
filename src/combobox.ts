@@ -6,6 +6,15 @@ import { title } from './title'
 
 export type ComboboxState = 'openend' | 'closed'
 
+export type ComboboxStyle = {
+  listAttr: ListAttr
+  selection?: number
+  title?: TitleStyle
+  position?: { x: number; y: number }
+  autoshow?: boolean
+  autohide?: boolean
+}
+
 export class combobox extends G {
   title: title
   curntSelection: listItem
@@ -14,27 +23,28 @@ export class combobox extends G {
 
   pdy: number = 0
 
-  constructor(attr: {
-    listAttr: ListAttr
-    selection?: number
-    title?: TitleStyle
-    autoshow?: boolean
-    autohide?: boolean
-  }) {
+  constructor(attr: ComboboxStyle) {
     super()
     this.id(Create_ID()).addClass('tds-combobox')
 
     // set title
-    attr.title && (this.title = new title(attr.title))
+    attr.title &&
+      ((attr.title.position.x += attr.position.x),
+      (attr.title.position.y += attr.position.y),
+      (this.title = new title(attr.title)))
 
     // set initial state
     this.state = 'openend'
 
     // create list
+    attr.listAttr.position.x += attr.position.x
+    attr.listAttr.position.y += attr.position.y
     this.list = new list({ ...attr.listAttr })
 
     // set selection
-    this.curntSelection = this.list.items[attr.selection]
+    this.curntSelection = this.list.items[
+      (attr.selection ??= 0)
+    ]
 
     // add list to instance
     this.add(this.list)
@@ -44,6 +54,8 @@ export class combobox extends G {
 
     // add title
     this.add(this.title)
+
+    //? move it
 
     attr.autohide &&
       this.on('mouseleave', () => {
@@ -77,7 +89,8 @@ export class combobox extends G {
     let cs = this.curntSelection
 
     let dy =
-      cs.background.bbox().y - this.list.items[0].background.bbox().y
+      cs.background.bbox().y -
+      this.list.items[0].background.bbox().y
 
     // move
     cs.background.dmove(0, -dy)
@@ -134,6 +147,9 @@ export class combobox extends G {
       el.condition = 'normal'
       el.applyBehavior()
     })
+
+    this.dispatch('tds-combobox-hidelist', this)
+    this.dispatch('tds-combobox-itemselected', this)
   }
 
   showList() {
@@ -149,5 +165,7 @@ export class combobox extends G {
 
     // move selection to its initial position
     this.curntSelection.dmove(0, this.pdy)
+
+    this.dispatch('tds-combobox-showlist', this)
   }
 }

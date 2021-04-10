@@ -4,7 +4,14 @@ import {
   FillData,
 } from '@svgdotjs/svg.js'
 
-import { AnchorsMap, Create_ID, distP } from './common'
+import {
+  AnchorsMap,
+  createPinPoint,
+  createTempLine,
+  Create_ID,
+  distP,
+  isPointInCircle,
+} from './common'
 
 import { label, LabelAttr } from './label'
 
@@ -52,16 +59,16 @@ export const mitemCreator = (
         font: 'Menlo',
         fontWeight: 'normal',
         size: 12,
-        fill: { color: 'black' },
+        fill: { color: '#000000' },
       },
       background: {
         width: 5,
-        height: 5,
+        height: 36,
         radius: 4,
         fill: { color: '#FFFFFF' },
         stroke: { color: '#999999', width: 1 },
       },
-      backgroundRule: ['indent'],
+      backgroundRule: ['centered', 'indent'],
       indents: [4, 2, 2, 2],
       position: { x: p.x, y: p.y },
     },
@@ -80,7 +87,11 @@ export const mitemCreator = (
   )
 }
 
-/** base item for tds-core */
+/** base item for tds-core
+ *  'label' that can
+ *  - snap to grid or other item
+ *  - be 'selected'
+ */
 export class mitem extends label {
   widthFactor: number
 
@@ -104,7 +115,9 @@ export class mitem extends label {
     } = mitemSelectStyle
   ) {
     super(attr)
+    this.id(Create_ID()).addClass('tds-mitem')
 
+    // set styles
     this.highlightStyle = highlightStyle
     this.selectStyle = selectStyle
     this.normalStateStyle = {
@@ -112,10 +125,8 @@ export class mitem extends label {
       stroke: { ...attr.background.stroke },
     }
 
-    this.id(Create_ID()).addClass('tds-mitem')
-
-    this.widthFactor = wFactor
     // correct width according to widthFactor
+    this.widthFactor = wFactor
     this.correctWidth()
 
     // set initial position to grid
@@ -126,37 +137,44 @@ export class mitem extends label {
       this.move(bb.x - bbx, bb.y - bby)
     }
 
+    // hightlight item on mouse over
     this.on('mouseenter', () => {
       !this.selected && this.setHighLightStyle()
       this.front()
     })
 
+    // 'select' on mouse down
     this.on('mousedown', () => {
       !this.selected
         ? ((this.selected = true),
           this.setSelectStyle(),
-          this.root().fire('tds-mitem-directSelect', this))
+          this.fire('tds-mitem-directSelect', this))
         : // dont switch state
           0
     })
 
+    // restore normal state on 'mouseleave'
     this.on('mouseleave', () => {
       !this.selected && this.setNormalStyle()
     })
 
     this.on('dragmove', (ev: CustomEvent) => {
-      let a: [number, number[]] = [0, []]
+      // turn on snap
 
-      snapHandler(this, a)
+      snapHandler(this)
 
       const { box } = ev.detail
       ev.preventDefault()
 
-      if (a[0] == a[1].length) {
-        this.snaped = false
-      }
-
       if (this.snaped) {
+        this.move(
+          box.x -
+            (box.x % this.widthFactor) +
+            this.widthFactor,
+          box.y -
+            (box.y % this.widthFactor) +
+            this.widthFactor
+        )
         this.move(
           box.x - (box.x % this.widthFactor),
           box.y - (box.y % this.widthFactor)
@@ -166,39 +184,78 @@ export class mitem extends label {
       }
     })
 
-    function snapHandler(
-      inst: mitem,
-      a: [number, number[]]
-    ) {
+    /**
+     * set snap if one item to close to another
+     * @param inst drag instance
+     * @param ff flag for free not snaped item
+     */
+    function snapHandler(inst: mitem) {
       let cb = inst.bbox()
-      // find mitem instances
-      //prettier-ignore
-      let fi = inst.parent().children().filter(
-        (el: Element) => el.hasClass('tds-mitem') && el != inst)
-      a[0] = fi.length
-      fi.forEach((el: Element) => {
-        let elb = el.bbox()
-        let dist = distP(cb.cx, cb.cy, elb.cx, elb.cy) // get distance to mitems
+      let ff = 0
 
-        //prettier-ignore
-        if (dist < MITEM_FRIENDS_ZONE && el instanceof mitem)
-        {
-          let can = el.anchors // el - mitem in range
-          inst.anchors.forEach((this_el) => {
-            can.forEach((c_el) => {
-                let adist = distP(this_el[0], this_el[1], c_el[0], c_el[1])
-                // turn on snap to grid mode
-                if (adist < inst.widthFactor * 1.5) {
-                  inst.snaped = true
-                  return true
-                }
-              })
-            })
+      let fi = inst
+        .parent()
+        .children()
+        .filter(
+          (el: Element) =>
+            el.hasClass('tds-mitem') && el != inst
+        )
+
+      let instgiag = distP(cb.x, cb.y, cb.x2, cb.y2)
+
+      let trgI: [item: Element, dist: number][] = []
+
+      for (let i = 0; i < fi.length; i++) {
+        let ib = fi[i].bbox()
+        let idiag = distP(ib.x, ib.y, ib.x2, ib.y2)
+        if (
+          isPointInCircle(
+            ib.cx,
+            ib.cy,
+            cb.cx,
+            cb.cy,
+            (idiag + instgiag) * 0.75
+          )
+        ) {
+          let dist = distP(ib.cx, ib.cy, cb.cx, cb.cy)
+          if (fi[i] instanceof mitem)
+            trgI.push([fi[i], dist])
         }
-        else if (dist > MITEM_FRIENDS_ZONE * 0.1 && inst.snaped == true) {
-          a[1].push(1)
+      }
+      let srtT = trgI.sort((a, b) => a[1] - b[1])
+
+      for (let i = 0; i < srtT.length; i++) {
+        let ti = srtT[i][0]
+        if (ti instanceof mitem) {
+          for (
+            let tii = 0;
+            tii < ti.anchors.length;
+            tii++
+          ) {
+            for (
+              let ia = 0;
+              ia < inst.anchors.length;
+              ia++
+            ) {
+              let adist = distP(
+                ti.anchors[tii][0],
+                ti.anchors[tii][1],
+                inst.anchors[ia][0],
+                inst.anchors[ia][1]
+              )
+              if (adist < inst.widthFactor * 2) {
+                inst.snaped = true
+                ff = 1
+              }
+            }
+            if (ff == 1) break
+          }
+          if (ff == 1) break
         }
-      })
+      }
+      if (ff == 0) {
+        inst.snaped = false
+      }
     }
 
     /** set to grid on drop */

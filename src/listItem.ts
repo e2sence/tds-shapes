@@ -118,6 +118,9 @@ export class listItem extends label {
   /** Path | title indent from right side */
   suppIndent: number = 15
 
+  /**
+   * caution position of instance defined by 'position' in label ... position
+   */
   constructor(attr: ListItemAttr) {
     super(attr.label)
     this.id(Create_ID()).addClass('tds-listItem')
@@ -152,7 +155,9 @@ export class listItem extends label {
       .move(this.background.x(), this.background.y())
 
     // set state and condition
-    this.condition = attr.condition ? attr.condition : 'normal'
+    this.condition = attr.condition
+      ? attr.condition
+      : 'normal'
     this.state = attr.state ? attr.state : 'inactive'
 
     // finally set how it will look )
@@ -162,31 +167,35 @@ export class listItem extends label {
     this.applyBehavior()
 
     // adds supp item and foreground
-    this.add(this.suppItem)
+    this.suppItem && this.add(this.suppItem)
     this.add(this.foreground)
 
     // handle mouseenter / mouseleave and mousedown
     this.foreground.on('mouseenter', () => {
-      this.condition != 'highlight' && this.state != 'inactive'
+      this.condition != 'highlight' &&
+      this.state != 'inactive'
         ? (this.condition = 'mouseenter')
         : 0
       this.front()
       this.applyBehavior()
     })
     this.foreground.on('mouseleave', () => {
-      this.condition != 'highlight' && this.state != 'inactive'
+      this.condition != 'highlight' &&
+      this.state != 'inactive'
         ? (this.condition = 'normal')
         : 0
       this.applyBehavior()
     })
     this.foreground.on('mousedown', () => {
-      this.condition != 'highlight' && this.state != 'inactive'
+      this.condition != 'highlight' &&
+      this.state != 'inactive'
         ? (this.condition = 'onclick')
         : 0
       this.applyBehavior()
     })
     this.foreground.on('mouseup', () => {
-      this.condition != 'highlight' && this.state != 'inactive'
+      this.condition != 'highlight' &&
+      this.state != 'inactive'
         ? (this.condition = 'mouseenter')
         : 0
       this.front()
