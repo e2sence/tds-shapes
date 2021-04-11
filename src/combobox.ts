@@ -23,7 +23,14 @@ export class combobox extends G {
 
   pdy: number = 0
 
-  constructor(attr: ComboboxStyle) {
+  constructor(attr: {
+    listAttr: ListAttr
+    selection?: number
+    title?: TitleStyle
+    position?: { x: number; y: number }
+    autoshow?: boolean
+    autohide?: boolean
+  }) {
     super()
     this.id(Create_ID()).addClass('tds-combobox')
 
@@ -42,9 +49,8 @@ export class combobox extends G {
     this.list = new list({ ...attr.listAttr })
 
     // set selection
-    this.curntSelection = this.list.items[
-      (attr.selection ??= 0)
-    ]
+    // let r = attr.selection <= 0 && 0
+    this.curntSelection = this.list.items[attr.selection]
 
     // add list to instance
     this.add(this.list)
