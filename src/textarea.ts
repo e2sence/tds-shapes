@@ -178,6 +178,8 @@ export class textarea extends G {
             ta.clearRows()
             let _v = ta.getInput().value
 
+            console.log(ta.getInput().innerHTML)
+
             _v == '' && (_v = '\u2800')
 
             ta.fillRows(_v, ta.rowLen, extendsTittleDefStyle)
