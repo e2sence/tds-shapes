@@ -11,7 +11,7 @@ export const textareaDefStyle: BackgroundStyle = {
   fill: { color: '#D2D2D2' },
   stroke: { color: '#999999', width: 1 },
   radius: 6,
-  position: { x: 320, y: 700 },
+  position: { x: 0, y: 0 },
 }
 
 /** default style for single row */
@@ -69,8 +69,14 @@ export class textarea extends G {
     data: string
     rowLen?: number
     maxRows?: number
+    position?: { x: number; y: number }
   }) {
     super()
+
+    if (attr.position) {
+      attr.body.position.x += attr.position.x
+      attr.body.position.y += attr.position.y
+    }
 
     // body
     this.body = new Rect()
@@ -153,7 +159,7 @@ export class textarea extends G {
       // DOM string of input
       let inputHTML = `<textarea id="${ta.inputID}" 
                                     class="txtinput"
-                                    style="width:90%;height:90%;font-family:Menlo;font-size:"12">${_v}</textarea>`
+                                    style="resize:none;width:90%;height:90%;font-family:Menlo;font-size:"12">${_v}</textarea>`
 
       // show input with new data
       ta.input.node.innerHTML = inputHTML
