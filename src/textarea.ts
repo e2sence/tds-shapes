@@ -24,6 +24,16 @@ export const extendsTittleDefStyle: TitleStyle = {
   fill: { color: 'black' },
 }
 
+/** default style for header row */
+export const extendsHeaderDefStyle: TitleStyle = {
+  value: 'textArea:',
+  font: 'Menlo',
+  fontWeight: 'normal',
+  size: 12,
+  position: { x: 0, y: -15 },
+  fill: { color: 'black' },
+}
+
 /**
  * smth like this: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/textarea
  */
@@ -31,6 +41,7 @@ export class textarea extends G {
   /** text area body */
   body: Rect
 
+  /** caption in the title */
   title: title
 
   /** collection of titles when data in SVG mode */
@@ -54,7 +65,7 @@ export class textarea extends G {
   constructor(attr: {
     body: BackgroundStyle
     rowsTitleStyle: TitleStyle
-    //! headerTitleStyle: TitleStyle
+    headerTitleStyle?: TitleStyle
     data: string
     rowLen?: number
     maxRows?: number
@@ -71,6 +82,16 @@ export class textarea extends G {
       .x(attr.body.position.x)
       .y(attr.body.position.y)
     this.add(this.body)
+
+    // adds title if available
+    if (attr.headerTitleStyle) {
+      // correct position according to 'body'
+      attr.headerTitleStyle.position.x += attr.body.position.x
+      attr.headerTitleStyle.position.y += attr.body.position.y
+
+      this.title = new title(attr.headerTitleStyle)
+      this.add(this.title)
+    }
 
     // calc single sing lenght and overal no wrap string
     attr.rowLen
@@ -91,6 +112,11 @@ export class textarea extends G {
 
     // adds rows to body
     this.fillRows(attr.data, this.rowLen, attr.rowsTitleStyle)
+
+    // hide input before drag
+    this.on('beforedrag', () => {
+      this.reset()
+    })
 
     // handle click - start edit
     this.on('click', () => {
@@ -113,8 +139,8 @@ export class textarea extends G {
         .attr({
           width: ta.body.width() + 20,
           height: ta.body.height() + 20,
-          x: ta.bbox().x + 3,
-          y: ta.bbox().y + 3,
+          x: ta.body.bbox().x + 3,
+          y: ta.body.bbox().y + 3,
           id: frid,
         })
 
@@ -266,12 +292,12 @@ export class textarea extends G {
   private setInputVisibility(isVisible: boolean) {
     let el = this.getInput()
     if (isVisible) {
-      this.hide()
+      this.body.hide()
       this.input.node.setAttribute('style', 'display: inline-block;')
       el.focus()
       el.selectionEnd = el.selectionStart = this.value.length
     } else {
-      this.show()
+      this.body.show()
       if (this.input)
         this.input?.node?.setAttribute('style', 'display: none;')
     }
