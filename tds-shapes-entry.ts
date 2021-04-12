@@ -18,3 +18,5 @@ export * from './src/list'
 export * from './src/combobox'
 
 export * from './src/mitem'
+
+export * from './src/textarea'

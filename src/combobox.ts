@@ -34,6 +34,7 @@ export class combobox extends G {
     super()
     this.id(Create_ID()).addClass('tds-combobox')
 
+    !attr.position && (attr.position = { x: 0, y: 0 })
     // set title
     attr.title &&
       ((attr.title.position.x += attr.position.x),
@@ -43,6 +44,9 @@ export class combobox extends G {
     // set initial state
     this.state = 'openend'
 
+    !attr.position && (attr.position = { x: 0, y: 0 })
+    !attr.listAttr.position &&
+      (attr.listAttr.position = { x: 0, y: 0 })
     // create list
     attr.listAttr.position.x += attr.position.x
     attr.listAttr.position.y += attr.position.y
@@ -95,8 +99,7 @@ export class combobox extends G {
     let cs = this.curntSelection
 
     let dy =
-      cs.background.bbox().y -
-      this.list.items[0].background.bbox().y
+      cs.background.bbox().y - this.list.items[0].background.bbox().y
 
     // move
     cs.background.dmove(0, -dy)

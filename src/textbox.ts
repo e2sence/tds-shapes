@@ -72,7 +72,6 @@ export class textbox extends label {
         })
 
       // value to transfer to input
-
       tb.dispatch('tds-textbox-beforechange', tb)
 
       let _v = tb.title.value
@@ -137,9 +136,7 @@ export class textbox extends label {
 
   /** get input as HTMLInputElement */
   getInput() {
-    return document.getElementById(
-      this.inputID
-    ) as HTMLInputElement
+    return document.getElementById(this.inputID) as HTMLInputElement
   }
 
   /** hide/ show input field */
@@ -148,10 +145,7 @@ export class textbox extends label {
 
     if (isVisible) {
       this.hide()
-      this.input.node.setAttribute(
-        'style',
-        'display: inline-block;'
-      )
+      this.input.node.setAttribute('style', 'display: inline-block;')
       // set focus and move cursor to end
       el.focus()
       // if input type is 'text'
@@ -161,10 +155,7 @@ export class textbox extends label {
     } else {
       this.show()
       if (this.input)
-        this.input?.node?.setAttribute(
-          'style',
-          'display: none;'
-        )
+        this.input?.node?.setAttribute('style', 'display: none;')
     }
   }
 }

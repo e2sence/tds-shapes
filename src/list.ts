@@ -81,6 +81,7 @@ export class list extends G {
       this.add(this.title)
     }
 
+    !attr.position && (attr.position = { x: 0, y: 0 })
     // create body rectangle
     this.body = new Rect()
       .width(attr.body.width)
@@ -104,9 +105,7 @@ export class list extends G {
       )
       if (isSep) {
         isSep.value.start.y =
-          summHeight +
-          attr.subItemIndents.separator +
-          attr.position.y
+          summHeight + attr.subItemIndents.separator + attr.position.y
         isSep.value.start.x += attr.position.x
 
         let cs = new separator(isSep.value)
@@ -194,7 +193,6 @@ export class list extends G {
     })
 
     // set auto height
-    attr.autoHeight &&
-      this.body.height(attr.indents[3] + summHeight)
+    attr.autoHeight && this.body.height(attr.indents[3] + summHeight)
   }
 }
