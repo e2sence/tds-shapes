@@ -140,7 +140,7 @@ export class mitem extends label {
     // hightlight item on mouse over
     this.on('mouseenter', () => {
       !this.selected && this.setHighLightStyle()
-      this.front()
+      // this.front()
     })
 
     // 'select' on mouse down
@@ -167,14 +167,6 @@ export class mitem extends label {
       ev.preventDefault()
 
       if (this.snaped) {
-        this.move(
-          box.x -
-            (box.x % this.widthFactor) +
-            this.widthFactor,
-          box.y -
-            (box.y % this.widthFactor) +
-            this.widthFactor
-        )
         this.move(
           box.x - (box.x % this.widthFactor),
           box.y - (box.y % this.widthFactor)
@@ -245,6 +237,7 @@ export class mitem extends label {
               )
               if (adist < inst.widthFactor * 2) {
                 inst.snaped = true
+                inst.front()
                 ff = 1
               }
             }

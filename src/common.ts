@@ -1,9 +1,22 @@
 import { Svg } from '@svgdotjs/svg.js'
+import { Box } from '@svgdotjs/svg.js'
 import { Circle } from '@svgdotjs/svg.js'
-import { Element, FillData, Line, StrokeData } from '@svgdotjs/svg.js'
+import {
+  Element,
+  FillData,
+  Line,
+  StrokeData,
+} from '@svgdotjs/svg.js'
 import { ListAttr } from './list'
 
-export type StyleSize = 'xxs' | 'xs' | 's' | 'm' | 'l' | 'xl' | 'xxl'
+export type StyleSize =
+  | 'xxs'
+  | 'xs'
+  | 's'
+  | 'm'
+  | 'l'
+  | 'xl'
+  | 'xxl'
 
 export type FontWeight =
   | 'normal'
@@ -124,9 +137,13 @@ export const iconPath = {
  * @returns string like 'T40fbb0e49f748c'
  */
 export function Create_ID() {
-  return `T${(~~((Math.random() * (1 - 0.5) + 0.5) * 1e8)).toString(
-    16
-  )}${(~~((Math.random() * (1 - 0.5) + 0.5) * 1e8)).toString(16)}`
+  return `T${(~~(
+    (Math.random() * (1 - 0.5) + 0.5) *
+    1e8
+  )).toString(16)}${(~~(
+    (Math.random() * (1 - 0.5) + 0.5) *
+    1e8
+  )).toString(16)}`
 }
 
 /**
@@ -196,7 +213,9 @@ export const rndX = (n: number, x: number): number => {
 export const objectMerge = (s: any, t: any): void => {
   Object.keys(s).forEach((prop) => {
     if (typeof s[prop] == 'object' || undefined) {
-      !t[prop] ? (t[prop] = s[prop]) : objectMerge(s[prop], t[prop])
+      !t[prop]
+        ? (t[prop] = s[prop])
+        : objectMerge(s[prop], t[prop])
     } else {
       !t[prop] ? (t[prop] = s[prop]) : 0
     }
@@ -248,7 +267,9 @@ export const distP = (
   x1: number,
   y1: number
 ): number => {
-  return Math.sqrt((x1 - x) * (x1 - x) + (y1 - y) * (y1 - y))
+  return Math.sqrt(
+    (x1 - x) * (x1 - x) + (y1 - y) * (y1 - y)
+  )
 }
 
 /** controled, 'auto erase' line from point to point */
@@ -265,7 +286,8 @@ export const createTempLine = (
     el.hasClass('tds-templine' + id) && el.remove()
   })
 
-  !la && (la = { color: 'red', width: 1, dasharray: '5 2 5' })
+  !la &&
+    (la = { color: 'red', width: 1, dasharray: '5 2 5' })
 
   root.add(
     new Line()
@@ -315,9 +337,41 @@ export const createPinPoint = (
  * @param n number of characters, including the number of characters in the specified ending 'es'
  * @param es characters set at the end of a line
  */
-export function shrinkString(s: string, n: number, es: string) {
-  return s.length - n > 0 ? s.substr(0, n - es.length) + es : s
+export function shrinkString(
+  s: string,
+  n: number,
+  es: string
+) {
+  return s.length - n > 0
+    ? s.substr(0, n - es.length) + es
+    : s
 }
+
+/**
+ * check if point is inside rectangle
+ * Set boolean b to true if if the point with coordinates (x,y)
+ * is inside the rectangle with coordinates (x1,y1,x2,y2) , or to false otherwise.
+ * @param rect rectangle (x1,y1,x2,y2): number`s
+ * @param point point (x: number,y: number)
+ */
+export const pointInRect = (
+  rect: { x1: number; y1: number; x2: number; y2: number },
+  point: { x: number; y: number }
+) =>
+  point.x > rect.x1 &&
+  point.x < rect.x2 &&
+  point.y > rect.y1 &&
+  point.y < rect.y2
+
+// the same but rect is specified as Box
+export const pointInRectBox = (
+  rect: Box,
+  point: { x: number; y: number }
+) =>
+  point.x > rect.x &&
+  point.x < rect.x2 &&
+  point.y > rect.y &&
+  point.y < rect.y2
 
 /**
  * list group config example

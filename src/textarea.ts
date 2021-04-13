@@ -184,7 +184,7 @@ export class textarea extends G {
             ta.clearRows()
             let _v = ta.getInput().value
 
-            console.log(ta.getInput().innerHTML)
+            // console.log(ta.getInput().innerHTML)
 
             _v == '' && (_v = '\u2800')
 
@@ -254,7 +254,6 @@ export class textarea extends G {
           // if you have reached the maximum possible number of rows
           let ss = this.rows[i - 1].value
           this.rows[i - 1].value = ss.slice(0, -3) + '...'
-          console.log(this.rows[i - 1].value)
 
           endFlag = 1
         }
