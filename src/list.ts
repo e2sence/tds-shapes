@@ -57,6 +57,7 @@ export type ListAttr = {
     shortcut?: TitleStyle
     persStyle?: TitleStyle
     list?: ListAttr
+    payload?: any
   }[]
 
   separatorsInstances?: {
@@ -68,7 +69,7 @@ export type ListAttr = {
 export class list extends G {
   title: title
   body: Rect
-  items: Array<listItem> = [] //| separator | label> = []
+  items: Array<listItem | listItemGrouped> = [] //| separator | label> = []
   separators: Array<separator> = []
 
   constructor(attr: ListAttr = ListAttrDefault) {
@@ -105,7 +106,9 @@ export class list extends G {
       )
       if (isSep) {
         isSep.value.start.y =
-          summHeight + attr.subItemIndents.separator + attr.position.y
+          summHeight +
+          attr.subItemIndents.separator +
+          attr.position.y
         isSep.value.start.x += attr.position.x
 
         let cs = new separator(isSep.value)
@@ -175,8 +178,12 @@ export class list extends G {
         el = new listItemGrouped(lia, la)
       }
 
+      // store payload
+      el.remember('ml', ii.payload)
+
       // adds element to list items collection
       this.items.push(el)
+
       // increase overal items height
       summHeight +=
         el.title.bbox().height +
@@ -193,6 +200,7 @@ export class list extends G {
     })
 
     // set auto height
-    attr.autoHeight && this.body.height(attr.indents[3] + summHeight)
+    attr.autoHeight &&
+      this.body.height(attr.indents[3] + summHeight)
   }
 }

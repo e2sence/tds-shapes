@@ -1,19 +1,17 @@
-import {
-  StrokeData,
-  Element,
-  FillData,
-} from '@svgdotjs/svg.js'
+import { StrokeData, Element, FillData } from '@svgdotjs/svg.js'
 
 import {
   AnchorsMap,
-  createPinPoint,
-  createTempLine,
   Create_ID,
   distP,
+  GRID_STEP,
   isPointInCircle,
+  pointInRectBox,
+  shapeStackAtPoint,
 } from './common'
 
 import { label, LabelAttr } from './label'
+import { mitemjail } from './mitemjail'
 
 const mitemLabelAtr = {
   title: {
@@ -45,7 +43,6 @@ const mitemSelectStyle = {
   stroke: { color: '#000000', width: 1 },
 }
 
-const GRID_STEP = 9
 const MITEM_FRIENDS_ZONE = 100
 
 export const mitemCreator = (
@@ -102,9 +99,11 @@ export class mitem extends label {
   snaped: boolean = false
   selected: boolean = false
 
+  #friends: Element[] = []
+
   constructor(
     attr: LabelAttr,
-    wFactor: number = GRID_STEP,
+    wFactor: number = GRID_STEP / 2,
     highlightStyle: {
       fill: FillData
       stroke: StrokeData
@@ -145,12 +144,7 @@ export class mitem extends label {
 
     // 'select' on mouse down
     this.on('mousedown', () => {
-      !this.selected
-        ? ((this.selected = true),
-          this.setSelectStyle(),
-          this.fire('tds-mitem-directSelect', this))
-        : // dont switch state
-          0
+      this.selectHandler()
     })
 
     // restore normal state on 'mouseleave'
@@ -158,108 +152,175 @@ export class mitem extends label {
       !this.selected && this.setNormalStyle()
     })
 
-    this.on('dragmove', (ev: CustomEvent) => {
-      // turn on snap
+    this.on('dragstart', (ev: CustomEvent) => {
+      // this.parents()[0].type
+      if (this.parent() != this.root()) this.toRoot()
+      console.log(this.parents()[0].type)
 
-      snapHandler(this)
-
-      const { box } = ev.detail
-      ev.preventDefault()
-
-      if (this.snaped) {
-        this.move(
-          box.x - (box.x % this.widthFactor),
-          box.y - (box.y % this.widthFactor)
-        )
-      } else {
-        this.move(box.x, box.y)
-      }
+      // fill friends
+      this.#friends = this.friendsMitems()
     })
 
-    /**
-     * set snap if one item to close to another
-     * @param inst drag instance
-     * @param ff flag for free not snaped item
-     */
-    function snapHandler(inst: mitem) {
-      let cb = inst.bbox()
-      let ff = 0
+    this.on('dragmove', (ev: CustomEvent) => {
+      this.dragMoveHandler(ev)
+    })
 
-      let fi = inst
-        .parent()
-        .children()
-        .filter(
-          (el: Element) =>
-            el.hasClass('tds-mitem') && el != inst
-        )
+    /** set to grid on drop */
+    this.on('dragend', (ev: CustomEvent) => {
+      this.checkLandingPosition(ev)
+      this.dragEndHandler()
+    })
+  }
 
-      let instgiag = distP(cb.x, cb.y, cb.x2, cb.y2)
+  /** try to find 'mitemjail' */
+  checkLandingPosition(ev: CustomEvent) {
+    let cb = this.bbox()
+    console.log(cb)
 
-      let trgI: [item: Element, dist: number][] = []
+    // get stack of elements at item center
+    const r = shapeStackAtPoint(
+      this.root(),
+      { x: cb.cx, y: cb.cy },
+      this
+    )
 
-      for (let i = 0; i < fi.length; i++) {
-        let ib = fi[i].bbox()
-        let idiag = distP(ib.x, ib.y, ib.x2, ib.y2)
+    // if we have 'tds-container'
+    let rl = r.length
+    if (rl != 0) {
+      let landingElement = r[rl - 1]
+      if (landingElement instanceof mitemjail) {
+        // check body
         if (
-          isPointInCircle(
-            ib.cx,
-            ib.cy,
-            cb.cx,
-            cb.cy,
-            (idiag + instgiag) * 0.75
-          )
+          pointInRectBox(landingElement.body.bbox(), {
+            x: cb.cx,
+            y: cb.cy,
+          })
         ) {
-          let dist = distP(ib.cx, ib.cy, cb.cx, cb.cy)
-          if (fi[i] instanceof mitem)
-            trgI.push([fi[i], dist])
+          r[rl - 1].add(this)
         }
       }
-      let srtT = trgI.sort((a, b) => a[1] - b[1])
+    }
+  }
 
-      for (let i = 0; i < srtT.length; i++) {
-        let ti = srtT[i][0]
-        if (ti instanceof mitem) {
-          for (
-            let tii = 0;
-            tii < ti.anchors.length;
-            tii++
-          ) {
-            for (
-              let ia = 0;
-              ia < inst.anchors.length;
-              ia++
-            ) {
-              let adist = distP(
-                ti.anchors[tii][0],
-                ti.anchors[tii][1],
-                inst.anchors[ia][0],
-                inst.anchors[ia][1]
-              )
-              if (adist < inst.widthFactor * 2) {
-                inst.snaped = true
-                inst.front()
-                ff = 1
-              }
+  selectHandler() {
+    !this.selected
+      ? ((this.selected = true),
+        this.select(true),
+        this.fire('tds-mitem-directSelect', this))
+      : // dont switch state
+        0
+  }
+
+  /** friends mitens on field and in the containers */
+  private friendsMitems() {
+    // 'mitems' directly on field
+    let fi = this.parent()
+      .children()
+      .filter((el: Element) => el.hasClass('tds-mitem') && el != this)
+
+    // mitems inside 'tds-container'
+    let ja: mitem[] = []
+    this.parent()
+      .children()
+      .filter((el: Element) => el.hasClass('tds-container'))
+      .forEach((el) => {
+        if (el instanceof mitemjail) {
+          el.items.forEach((el) => {
+            if (el instanceof mitem) {
+              ja.push(el)
             }
-            if (ff == 1) break
+          })
+        }
+      })
+
+    // adds hiden by 'tds-container' mitems
+    fi.push(...ja)
+
+    return fi
+  }
+
+  /**
+   * set snap if one item to close to another
+   * @param ff flag for free not snaped item
+   */
+  private snapHandler() {
+    let cb = this.bbox()
+    let ff = 0
+
+    let instgiag = distP(cb.x, cb.y, cb.x2, cb.y2)
+
+    let trgI: [item: Element, dist: number][] = []
+
+    for (let i = 0; i < this.#friends.length; i++) {
+      let ib = this.#friends[i].bbox()
+      let idiag = distP(ib.x, ib.y, ib.x2, ib.y2)
+      if (
+        isPointInCircle(
+          ib.cx,
+          ib.cy,
+          cb.cx,
+          cb.cy,
+          (idiag + instgiag) * 0.75
+        )
+      ) {
+        let dist = distP(ib.cx, ib.cy, cb.cx, cb.cy)
+        if (this.#friends[i] instanceof mitem)
+          trgI.push([this.#friends[i], dist])
+      }
+    }
+    let srtT = trgI.sort((a, b) => a[1] - b[1])
+
+    for (let i = 0; i < srtT.length; i++) {
+      let ti = srtT[i][0]
+      if (ti instanceof mitem) {
+        for (let tii = 0; tii < ti.anchors.length; tii++) {
+          for (let ia = 0; ia < this.anchors.length; ia++) {
+            let adist = distP(
+              ti.anchors[tii][0],
+              ti.anchors[tii][1],
+              this.anchors[ia][0],
+              this.anchors[ia][1]
+            )
+            if (adist < this.widthFactor * 2) {
+              this.snaped = true
+              this.front()
+              ff = 1
+            }
           }
           if (ff == 1) break
         }
-      }
-      if (ff == 0) {
-        inst.snaped = false
+        if (ff == 1) break
       }
     }
+    if (ff == 0) {
+      this.snaped = false
+    }
+  }
+  dragMoveHandler(ev: CustomEvent) {
+    // handle snap
+    this.snapHandler()
 
-    /** set to grid on drop */
-    this.on('dragend', () => {
-      const box = this.background.bbox()
+    const { box } = ev.detail
+    ev.preventDefault()
+
+    if (this.snaped) {
       this.move(
         box.x - (box.x % this.widthFactor),
         box.y - (box.y % this.widthFactor)
       )
-      this.snaped = false
-    })
+    } else {
+      this.move(box.x, box.y)
+    }
+  }
+
+  /** handle grid snapping on end of drag */
+  dragEndHandler() {
+    const box = this.background.bbox()
+    this.move(
+      box.x - (box.x % this.widthFactor),
+      box.y - (box.y % this.widthFactor)
+    )
+    this.snaped = false
   }
 
   /** proxy move */
@@ -308,9 +369,7 @@ export class mitem extends label {
   private correctWidth() {
     let curWidth = this.background.width()
     this.background.width(
-      curWidth -
-        (curWidth % this.widthFactor) +
-        this.widthFactor
+      curWidth - (curWidth % this.widthFactor) + this.widthFactor
     )
   }
 

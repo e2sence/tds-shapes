@@ -34,6 +34,18 @@ export const extendsHeaderDefStyle: TitleStyle = {
   fill: { color: 'black' },
 }
 
+/** type for attr in textares constructor */
+export type TextAreaStyleAttr = {
+  body: BackgroundStyle
+  rowsTitleStyle: TitleStyle
+  headerTitleStyle?: TitleStyle
+  data: string
+  rowLen?: number
+  maxRows?: number
+  position?: { x: number; y: number }
+  disallowDirect?: boolean
+}
+
 /**
  * smth like this: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/textarea
  */
@@ -62,15 +74,7 @@ export class textarea extends G {
    * create textarea  instance
    * @param attr - BackgroundStyle, TitleStyle, data - directly the string to be displayed
    */
-  constructor(attr: {
-    body: BackgroundStyle
-    rowsTitleStyle: TitleStyle
-    headerTitleStyle?: TitleStyle
-    data: string
-    rowLen?: number
-    maxRows?: number
-    position?: { x: number; y: number }
-  }) {
+  constructor(attr: TextAreaStyleAttr) {
     super()
 
     if (attr.position) {
@@ -127,81 +131,80 @@ export class textarea extends G {
     // handle click - start edit
     this.on('click', () => {
       //dblclick
-      changeHandler(this)
+      if (!attr.disallowDirect) this.changeHandler()
     })
+  }
 
-    /**
-     * adds to canvas <foreignObject> with <textarea>
-     * @param ta textarea instance
-     */
-    function changeHandler(ta: textarea) {
-      // id for foreing element
-      let frid = Create_ID()
+  /**
+   * adds to canvas <foreignObject> with <textarea>
+   * @param ta textarea instance
+   */
+  changeHandler() {
+    // id for foreing element
+    let frid = Create_ID()
 
-      // create foreign object
-      ta.input = ta
-        .root()
-        .element('foreignObject')
-        .attr({
-          width: ta.body.width() + 20,
-          height: ta.body.height() + 20,
-          x: ta.body.bbox().x + 3,
-          y: ta.body.bbox().y + 3,
-          id: frid,
-        })
+    // create foreign object
+    this.input = this.root()
+      .element('foreignObject')
+      .attr({
+        width: this.body.width() + 20,
+        height: this.body.height() + 20,
+        x: this.body.bbox().x + 3,
+        y: this.body.bbox().y + 3,
+        id: frid,
+      })
 
-      let _v = ta.value
+    let _v = this.value
 
-      if (_v == '\u2800') {
-        _v = ''
-      }
-
-      // DOM string of input
-      let inputHTML = `<textarea id="${ta.inputID}" 
-                                    class="txtinput"
-                                    style="resize:none;width:90%;height:90%;font-family:Menlo;font-size:"12">${_v}</textarea>`
-
-      // show input with new data
-      ta.input.node.innerHTML = inputHTML
-      ta.setInputVisibility(true)
-
-      // handle loose focus
-      ta.input.node.addEventListener(
-        'blur',
-        () => {
-          ta.setInputVisibility(false)
-          ta.input.node.remove()
-        },
-        true
-      )
-
-      // handle keyboard
-      ta.input.node.addEventListener(
-        'keydown',
-        (ev: KeyboardEvent) => {
-          if (ev.key == 'Enter') {
-            // if (!ev.shiftKey) {
-            ta.clearRows()
-            let _v = ta.getInput().value
-
-            // console.log(ta.getInput().innerHTML)
-
-            _v == '' && (_v = '\u2800')
-
-            ta.fillRows(_v, ta.rowLen, extendsTittleDefStyle)
-
-            ta.dispatch('tds-textarea-valuechanged', ta)
-
-            ta.setInputVisibility(false)
-          }
-          //   }
-          if (ev.key == 'Escape') {
-            ta.setInputVisibility(false)
-          }
-        },
-        true
-      )
+    if (_v == '\u2800') {
+      _v = ''
     }
+
+    // DOM string of input
+    let inputHTML = `<textarea id="${this.inputID}" 
+                                  class="txtinput"
+                                  style="resize:none;width:90%;height:90%;font-family:Menlo;font-size:"12">${_v}</textarea>`
+
+    // show input with new data
+    this.input.node.innerHTML = inputHTML
+    this.setInputVisibility(true)
+
+    // handle loose focus
+    this.input.node.addEventListener(
+      'blur',
+      () => {
+        this.setInputVisibility(false)
+        this.input.node.remove()
+      },
+      true
+    )
+
+    // handle keyboard
+    this.input.node.addEventListener(
+      'keydown',
+      (ev: KeyboardEvent) => {
+        if (ev.key == 'Enter') {
+          // if (!ev.shiftKey) {
+          this.clearRows()
+          let _v = this.getInput().value
+
+          // console.log(ta.getInput().innerHTML)
+
+          _v == '' && (_v = '\u2800')
+
+          this.fillRows(_v, this.rowLen, extendsTittleDefStyle)
+
+          this.dispatch('tds-textarea-valuechanged', this)
+
+          this.setInputVisibility(false)
+        }
+        //   }
+        if (ev.key == 'Escape') {
+          this.setInputVisibility(false)
+        }
+      },
+      true
+    )
   }
 
   /** calculating line length depending on body width */
@@ -296,7 +299,7 @@ export class textarea extends G {
   }
 
   /** hide/ show input field */
-  private setInputVisibility(isVisible: boolean) {
+  setInputVisibility(isVisible: boolean) {
     let el = this.getInput()
     if (isVisible) {
       this.body.hide()

@@ -7,10 +7,11 @@ export class listItemGrouped extends listItem {
   constructor(itemAttr: ListItemAttr, listAttr: ListAttr) {
     super(itemAttr)
 
-    setTimeout(() => {
-      this.list = new list(listAttr).hide()
-      this.add(this.list)
-    }, 0)
+    //! list initialization moved outside setTimeout
+    this.list = new list(listAttr).hide()
+    this.add(this.list)
+
+    setTimeout(() => {}, 0)
 
     this.on('mouseenter', () => {
       this.condition = 'highlight'

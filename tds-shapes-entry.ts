@@ -10,6 +10,7 @@ export * from './src/textbox'
 
 export * from './src/slider'
 
+export * from './src/separator'
 export * from './src/listItem'
 export * from './src/listItemGrouped'
 
@@ -20,3 +21,4 @@ export * from './src/combobox'
 export * from './src/mitem'
 
 export * from './src/textarea'
+export * from './src/mitemjail'

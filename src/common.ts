@@ -1,22 +1,21 @@
 import { Svg } from '@svgdotjs/svg.js'
 import { Box } from '@svgdotjs/svg.js'
 import { Circle } from '@svgdotjs/svg.js'
-import {
-  Element,
-  FillData,
-  Line,
-  StrokeData,
-} from '@svgdotjs/svg.js'
+import { Element, FillData, Line, StrokeData } from '@svgdotjs/svg.js'
 import { ListAttr } from './list'
 
-export type StyleSize =
-  | 'xxs'
-  | 'xs'
-  | 's'
-  | 'm'
-  | 'l'
-  | 'xl'
-  | 'xxl'
+export const GRID_STEP = 9
+
+/** object dimensions
+ * width: number,
+ * height: number
+ */
+export type size = {
+  width: number
+  height: number
+}
+
+export type StyleSize = 'xxs' | 'xs' | 's' | 'm' | 'l' | 'xl' | 'xxl'
 
 export type FontWeight =
   | 'normal'
@@ -137,13 +136,9 @@ export const iconPath = {
  * @returns string like 'T40fbb0e49f748c'
  */
 export function Create_ID() {
-  return `T${(~~(
-    (Math.random() * (1 - 0.5) + 0.5) *
-    1e8
-  )).toString(16)}${(~~(
-    (Math.random() * (1 - 0.5) + 0.5) *
-    1e8
-  )).toString(16)}`
+  return `T${(~~((Math.random() * (1 - 0.5) + 0.5) * 1e8)).toString(
+    16
+  )}${(~~((Math.random() * (1 - 0.5) + 0.5) * 1e8)).toString(16)}`
 }
 
 /**
@@ -213,9 +208,7 @@ export const rndX = (n: number, x: number): number => {
 export const objectMerge = (s: any, t: any): void => {
   Object.keys(s).forEach((prop) => {
     if (typeof s[prop] == 'object' || undefined) {
-      !t[prop]
-        ? (t[prop] = s[prop])
-        : objectMerge(s[prop], t[prop])
+      !t[prop] ? (t[prop] = s[prop]) : objectMerge(s[prop], t[prop])
     } else {
       !t[prop] ? (t[prop] = s[prop]) : 0
     }
@@ -267,9 +260,7 @@ export const distP = (
   x1: number,
   y1: number
 ): number => {
-  return Math.sqrt(
-    (x1 - x) * (x1 - x) + (y1 - y) * (y1 - y)
-  )
+  return Math.sqrt((x1 - x) * (x1 - x) + (y1 - y) * (y1 - y))
 }
 
 /** controled, 'auto erase' line from point to point */
@@ -286,22 +277,23 @@ export const createTempLine = (
     el.hasClass('tds-templine' + id) && el.remove()
   })
 
-  !la &&
-    (la = { color: 'red', width: 1, dasharray: '5 2 5' })
+  !la && (la = { color: 'red', width: 1, dasharray: '5 2 5' })
 
-  root.add(
-    new Line()
-      .plot([
-        [x, y],
-        [x1, y1],
-      ])
-      .stroke({
-        color: la.color,
-        width: la.width,
-        dasharray: la.dasharray,
-      })
-      .addClass('tds-templine' + id)
-  )
+  let _l = new Line()
+    .plot([
+      [x, y],
+      [x1, y1],
+    ])
+    .stroke({
+      color: la.color,
+      width: la.width,
+      dasharray: la.dasharray,
+    })
+    .addClass('tds-templine' + id)
+
+  root.add(_l)
+
+  return _l
 }
 
 export const createPinPoint = (
@@ -337,14 +329,8 @@ export const createPinPoint = (
  * @param n number of characters, including the number of characters in the specified ending 'es'
  * @param es characters set at the end of a line
  */
-export function shrinkString(
-  s: string,
-  n: number,
-  es: string
-) {
-  return s.length - n > 0
-    ? s.substr(0, n - es.length) + es
-    : s
+export function shrinkString(s: string, n: number, es: string) {
+  return s.length - n > 0 ? s.substr(0, n - es.length) + es : s
 }
 
 /**
@@ -372,6 +358,30 @@ export const pointInRectBox = (
   point.x < rect.x2 &&
   point.y > rect.y &&
   point.y < rect.y2
+
+/**
+ * get element stack at point
+ * @param f field to seach
+ * @param p point
+ * @param element element to ignore
+ */
+export const shapeStackAtPoint = (
+  f: Svg,
+  p: { x: number; y: number },
+  element: Element
+) => {
+  let r
+  r = f.children().filter((el) => el != element)
+  r = r.filter((el) => el.hasClass('tds-container'))
+  r = r.filter((el) => {
+    const { x, y, x2, y2 } = el.bbox()
+    return pointInRect(
+      { x1: x, y1: y, x2: x2, y2: y2 },
+      { x: p.x, y: p.y }
+    )
+  })
+  return r
+}
 
 /**
  * list group config example
