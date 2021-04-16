@@ -162,6 +162,8 @@ export class mitem extends label {
     })
 
     this.on('dragmove', (ev: CustomEvent) => {
+      // skipping the mouse movement event through the element when dragging
+      this.attr({ 'pointer-events': 'none' })
       this.dragMoveHandler(ev)
     })
 
@@ -169,6 +171,9 @@ export class mitem extends label {
     this.on('dragend', (ev: CustomEvent) => {
       this.checkLandingPosition(ev)
       this.dragEndHandler()
+
+      // returning the perception of mouse events
+      this.attr({ 'pointer-events': 'auto' })
     })
   }
 
