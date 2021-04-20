@@ -19,6 +19,7 @@ export * from './src/list'
 export * from './src/combobox'
 
 export * from './src/mitem'
+export * from './src/mitemmark'
 
 export * from './src/textarea'
 export * from './src/mitemjail'

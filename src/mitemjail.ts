@@ -41,7 +41,11 @@ export const mitemjailBodyDefStyle = (): BackgroundStyle => {
     height: 144,
     radius: 4,
     fill: { color: '#F1F1F1' },
-    stroke: { color: '#D2D2D2', width: 1, dasharray: '5 5' },
+    stroke: {
+      color: '#D2D2D2',
+      width: 1,
+      dasharray: '5 5',
+    },
     position: { x: 0, y: 36 },
   }
 }
@@ -58,7 +62,7 @@ export const mitemjailPinDefStyle = () => {
 export const mitemHighliteStyles = () => {
   return {
     highlite: {
-      headerStroke: { color: 'black', opacity: 0.5 },
+      headerStroke: { color: 'black', opacity: 0.2 },
       bodyStroke: { color: 'black', opacity: 0.5 },
       pinStroke: { color: 'black', opacity: 0.5 },
     },
@@ -68,7 +72,11 @@ export const mitemHighliteStyles = () => {
       pinStroke: { color: 'black', opacity: 1 },
     },
     normal: {
-      headerStroke: { color: '#D2D2D2', width: 1, opacity: 1 },
+      headerStroke: {
+        color: '#D2D2D2',
+        width: 1,
+        opacity: 1,
+      },
       bodyStroke: {
         color: '#D2D2D2',
         width: 1,
@@ -169,7 +177,8 @@ export class mitemjail extends G {
     this.header.on('dblclick', () => {
       this.hideHandler()
     })
-    this.pin.on('dblclick', () => {
+    this.pin.on('dblclick', (ev: MouseEvent) => {
+      ev.preventDefault()
       this.autosize()
     })
 
@@ -307,24 +316,20 @@ export class mitemjail extends G {
    * support for marker movement that changes the working area
    */
   pinMoveHandler(ev: CustomEvent) {
-    const _oper = this.#operMinSize
-    // min values for width, height
-    const { width, height } = _oper
-    // resizeShape instance and its box
-    const { box, handler } = ev.detail
-    let { cx, cy, x, y } = box
     // disable default behavior
     ev.preventDefault()
-    // check body size set it to min if it less then 'unionMinSize'
-    // current width, height
-    let _w = this.pin.cx() - this.body.x()
-    let _h = this.pin.cy() - this.body.y()
-    // set it to min
-    this.body.width(_w <= width ? width : _w)
-    this.body.height(_h < height ? height : _h)
+
+    const _oper = this.#operMinSize
+    // resizeShape instance and its box
+    const { box, handler } = ev.detail
+    let { x, y } = box
+
     // control whether the limit on the current 'mitems' is not exceeded
     x < _oper.x && (x = _oper.x)
     y < _oper.y && (y = _oper.y)
+
+    this.body.width(x - this.body.x() + this.pin.width() / 2)
+    this.body.height(y - this.body.y() + this.pin.height() / 2)
 
     handler.move(x, y)
   }

@@ -15,6 +15,15 @@ export type size = {
   height: number
 }
 
+export type position = {
+  x: number
+  y: number
+}
+export const posdef: position = {
+  x: 0,
+  y: 0,
+}
+
 export type StyleSize = 'xxs' | 'xs' | 's' | 'm' | 'l' | 'xl' | 'xxl'
 
 export type FontWeight =
@@ -431,27 +440,28 @@ export const ListAttrGroupDefault: ListAttr = {
 
   // prettier-ignore
   itemsBehavior: [{
-      itemPart: 'background', behavior: [
-        //    { condition: 'normal', attr: { fill: { color: 'red' }, stroke: { color: 'blue', width: 2 } } },
-        //    { condition: 'mouseenter', attr: {fill: {color: 'grey'}, stroke: { color: 'black', width: 2}}}
-      ]}, {
-      itemPart: 'shotrcut', behavior: [
-        //    {condition: 'mouseenter', attr: {fill: { color : 'red'}}},
-        //    {},   
-          ]
-      }],
+    itemPart: 'background', behavior: [
+      //    { condition: 'normal', attr: { fill: { color: 'red' }, stroke: { color: 'blue', width: 2 } } },
+      //    { condition: 'mouseenter', attr: {fill: {color: 'grey'}, stroke: { color: 'black', width: 2}}}
+    ]
+  }, {
+    itemPart: 'shotrcut', behavior: [
+      //    {condition: 'mouseenter', attr: {fill: { color : 'red'}}},
+      //    {},   
+    ]
+  }],
 
   // prettier-ignore
   itemsInstances: [
     { kind: 'general', str: 'File', state: 'active', condition: 'normal' },
     { kind: 'general', str: 'Edit', state: 'active', condition: 'normal' },
     { kind: 'general', str: 'View', state: 'active', condition: 'normal' },
-    { kind: 'general', str: 'Terminal', state: 'active', condition: 'normal'},
-    { kind: 'general', str: 'Wait a minutes...', state: 'active', condition: 'normal'},
-    ],
+    { kind: 'general', str: 'Terminal', state: 'active', condition: 'normal' },
+    { kind: 'general', str: 'Wait a minutes...', state: 'active', condition: 'normal' },
+  ],
   // prettier-ignore
   separatorsInstances: [
-      {order: 2, value: {start: {x: 25, y: 0}, length: 160, stroke: {color: '#D2D2D2'}} },
+    { order: 2, value: { start: { x: 25, y: 0 }, length: 160, stroke: { color: '#D2D2D2' } } },
   ],
 }
 
@@ -503,31 +513,32 @@ export const ListAttrDefault: ListAttr = {
 
   // prettier-ignore
   itemsBehavior: [{
-      itemPart: 'background', behavior: [
-        //    { condition: 'normal', attr: { fill: { color: 'red' }, stroke: { color: 'blue', width: 2 } } },
-        //    { condition: 'mouseenter', attr: {fill: {color: 'grey'}, stroke: { color: 'black', width: 2}}}
-      ]}, {
-      itemPart: 'shotrcut', behavior: [
-        //    {condition: 'mouseenter', attr: {fill: { color : 'red'}}},
-        //    {},   
-          ]
-      }],
+    itemPart: 'background', behavior: [
+      //    { condition: 'normal', attr: { fill: { color: 'red' }, stroke: { color: 'blue', width: 2 } } },
+      //    { condition: 'mouseenter', attr: {fill: {color: 'grey'}, stroke: { color: 'black', width: 2}}}
+    ]
+  }, {
+    itemPart: 'shotrcut', behavior: [
+      //    {condition: 'mouseenter', attr: {fill: { color : 'red'}}},
+      //    {},   
+    ]
+  }],
 
   // prettier-ignore
   itemsInstances: [
     { kind: 'general', str: 'File', state: 'active', condition: 'normal' },
     { kind: 'general', str: 'Edit', state: 'active', condition: 'normal' },
-    { kind: 'shortcut', str: 'Window', state: 'active', condition: 'normal', shortcut: {value: 'cmd + X', font: 'Menlo', fontWeight: 'normal', size: 12, position: {x: 0, y: 0}, fill: {color: 'green'}}},
+    { kind: 'shortcut', str: 'Window', state: 'active', condition: 'normal', shortcut: { value: 'cmd + X', font: 'Menlo', fontWeight: 'normal', size: 12, position: { x: 0, y: 0 }, fill: { color: 'green' } } },
     { kind: 'general', str: 'View', state: 'active', condition: 'normal' },
-    { kind: 'icon', str: 'Magic cross', state: 'active', condition: 'normal', icon: { d: iconPath.cross, fill: {color: 'black'}, stroke: {color: 'black'}}},
-    { kind: 'general', str: 'Terminal', state: 'active', condition: 'normal'},
-    { kind: 'general', str: 'Wait a minutes...', state: 'active', condition: 'normal'},
-    { kind: 'group', str: 'Wonder group', state: 'active', condition: 'normal', icon: { d: iconPath.rightChevron, fill: {color: 'black'}, stroke: {color: 'black'}}, list: ListAttrGroupDefault},
-    ],
+    { kind: 'icon', str: 'Magic cross', state: 'active', condition: 'normal', icon: { d: iconPath.cross, fill: { color: 'black' }, stroke: { color: 'black' } } },
+    { kind: 'general', str: 'Terminal', state: 'active', condition: 'normal' },
+    { kind: 'general', str: 'Wait a minutes...', state: 'active', condition: 'normal' },
+    { kind: 'group', str: 'Wonder group', state: 'active', condition: 'normal', icon: { d: iconPath.rightChevron, fill: { color: 'black' }, stroke: { color: 'black' } }, list: ListAttrGroupDefault },
+  ],
   // prettier-ignore
   separatorsInstances: [
-      {order: 2, value: {start: {x: 25, y: 0}, length: 160, stroke: {color: '#D2D2D2'}} },
-      {order: 4, value: {start: {x: 25, y: 0}, length: 160, stroke: {color: '#D2D2D2'}} },
-      {order: 7, value: {start: {x: 25, y: 0}, length: 160, stroke: {color: '#D2D2D2'}} },
+    { order: 2, value: { start: { x: 25, y: 0 }, length: 160, stroke: { color: '#D2D2D2' } } },
+    { order: 4, value: { start: { x: 25, y: 0 }, length: 160, stroke: { color: '#D2D2D2' } } },
+    { order: 7, value: { start: { x: 25, y: 0 }, length: 160, stroke: { color: '#D2D2D2' } } },
   ],
 }

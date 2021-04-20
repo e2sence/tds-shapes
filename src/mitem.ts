@@ -12,6 +12,7 @@ import {
 
 import { label, LabelAttr } from './label'
 import { mitemjail } from './mitemjail'
+import { marks } from './mitemmark'
 
 const mitemLabelAtr = {
   title: {
@@ -99,11 +100,13 @@ export class mitem extends label {
   snaped: boolean = false
   selected: boolean = false
 
-  #friends: Element[] = []
+  friends: Element[] = []
+
+  marks: marks
 
   constructor(
     attr: LabelAttr,
-    wFactor: number = GRID_STEP / 2,
+    wFactor: number = GRID_STEP,
     highlightStyle: {
       fill: FillData
       stroke: StrokeData
@@ -155,10 +158,9 @@ export class mitem extends label {
     this.on('dragstart', (ev: CustomEvent) => {
       // this.parents()[0].type
       if (this.parent() != this.root()) this.toRoot()
-      console.log(this.parents()[0].type)
 
       // fill friends
-      this.#friends = this.friendsMitems()
+      this.friends = this.friendsMitems()
     })
 
     this.on('dragmove', (ev: CustomEvent) => {
@@ -177,10 +179,13 @@ export class mitem extends label {
     })
   }
 
+  initFriends() {
+    this.friends = this.friendsMitems()
+  }
+
   /** try to find 'mitemjail' */
   checkLandingPosition(ev: CustomEvent) {
     let cb = this.bbox()
-    console.log(cb)
 
     // get stack of elements at item center
     const r = shapeStackAtPoint(
@@ -256,8 +261,8 @@ export class mitem extends label {
 
     let trgI: [item: Element, dist: number][] = []
 
-    for (let i = 0; i < this.#friends.length; i++) {
-      let ib = this.#friends[i].bbox()
+    for (let i = 0; i < this.friends.length; i++) {
+      let ib = this.friends[i].bbox()
       let idiag = distP(ib.x, ib.y, ib.x2, ib.y2)
       if (
         isPointInCircle(
@@ -269,8 +274,8 @@ export class mitem extends label {
         )
       ) {
         let dist = distP(ib.cx, ib.cy, cb.cx, cb.cy)
-        if (this.#friends[i] instanceof mitem)
-          trgI.push([this.#friends[i], dist])
+        if (this.friends[i] instanceof mitem)
+          trgI.push([this.friends[i], dist])
       }
     }
     let srtT = trgI.sort((a, b) => a[1] - b[1])
@@ -301,7 +306,7 @@ export class mitem extends label {
       this.snaped = false
     }
   }
-  dragMoveHandler(ev: CustomEvent) {
+  dragMoveHandler(ev: CustomEvent, c: boolean = false) {
     // handle snap
     this.snapHandler()
 
@@ -309,30 +314,39 @@ export class mitem extends label {
     ev.preventDefault()
 
     if (this.snaped) {
-      this.move(
-        box.x - (box.x % this.widthFactor),
-        box.y - (box.y % this.widthFactor)
-      )
+      if (!c) {
+        this.move(
+          box.x - (box.x % this.widthFactor),
+          box.y - (box.y % this.widthFactor)
+        )
+      } else {
+        this.cx(
+          ev.detail.event.x - (ev.detail.event.x % this.widthFactor)
+        )
+        this.cy(
+          ev.detail.event.y - (ev.detail.event.y % this.widthFactor)
+        )
+        c = false
+      }
     } else {
-      this.move(box.x, box.y)
+      if (!c) {
+        this.move(box.x, box.y)
+      } else {
+        this.cx(ev.detail.event.x)
+        this.cy(ev.detail.event.y)
+        c = false
+      }
     }
   }
 
   /** handle grid snapping on end of drag */
   dragEndHandler() {
-    const box = this.background.bbox()
+    const box = this.bbox()
     this.move(
       box.x - (box.x % this.widthFactor),
       box.y - (box.y % this.widthFactor)
     )
     this.snaped = false
-  }
-
-  /** proxy move */
-  move(x: number, y: number) {
-    super.move(x, y)
-
-    return this
   }
 
   /** set styles */
@@ -391,7 +405,7 @@ export class mitem extends label {
 
   /** stick points */
   get anchors(): AnchorsMap {
-    let bb = this.background.bbox()
+    let bb = this.bbox()
     return [
       [bb.x, bb.y + bb.height / 2],
       [bb.x, bb.y],
