@@ -109,6 +109,16 @@ export class marks {
     this.right.length > 0 && this.setPosition('right')
   }
 
+  /** check is mark exist */
+  hasMark(s: string, side: MarkSide) {
+    // get find string accordind to 'side'
+    let fs = side == 'left' ? s + '\u2800' : '\u2800' + s
+    // get storage
+    let ar = this.getStorage(side)
+    let fnds = ar.filter((el) => el[0].value == fs)
+    return fnds.length > 0 ? true : false
+  }
+
   /** adds mark to local storage */
   add(attr: MarkStyleAttr, i: number = -1) {
     // create instance of mark
@@ -116,7 +126,11 @@ export class marks {
   }
 
   /** remove mark from storage and erase from canvas */
-  remove(s: string, side: MarkSide, animate: boolean = false) {
+  remove(
+    s: string,
+    side: MarkSide,
+    animate: boolean = false
+  ) {
     // get find string accordind to 'side'
     let fs = side == 'left' ? s + '\u2800' : '\u2800' + s
 
@@ -172,7 +186,9 @@ export class marks {
     let _st = this.getStorage(s)
 
     let opX = 0
-    let _cb = !nf ? this.parent.bbox() : this.parent.background.bbox()
+    let _cb = !nf
+      ? this.parent.bbox()
+      : this.parent.background.bbox()
     let _x = 0
 
     if (s == 'left') {
@@ -243,7 +259,11 @@ export class marks {
     _op == 'add' ? _ar.push(_el) : _ar.splice(i, 0, _el)
   }
 
-  wiggle(el: mark, t: 'addorput' | 'remove', efn?: EventListener) {
+  wiggle(
+    el: mark,
+    t: 'addorput' | 'remove',
+    efn?: EventListener
+  ) {
     if (t == 'addorput') {
       let d = !(el.side == 'left')
         ? el.width() * 0.25
@@ -252,7 +272,9 @@ export class marks {
       return
     }
     if (t == 'remove') {
-      let d = !(el.side == 'left') ? -el.width() : el.width()
+      let d = !(el.side == 'left')
+        ? -el.width()
+        : el.width()
       el.animate(100).dx(d).after(efn)
     }
   }

@@ -1,9 +1,10 @@
-import { G, Circle, Element } from '@svgdotjs/svg.js'
+import { G, Circle, Element, FillData, Rect } from '@svgdotjs/svg.js'
 import { background } from './background'
 import {
   BackgroundStyle,
   Create_ID,
   GRID_STEP,
+  position,
   size,
   TitleStyle,
 } from './common'
@@ -98,17 +99,94 @@ const acceptStyle = (
   el.pin.stroke({ ...sel.pinStroke })
 }
 
+/** shape at left side of mitemjail */
+export namespace stdots {
+  /** just a white circle for 'stepDots' */
+  export const stepdotdef = (p: position = { x: 0, y: 0 }) => {
+    return new Circle()
+      .radius(3)
+      .fill({ color: 'white' })
+      .move(p.x, p.y)
+      .addClass('tds-step-dotssing')
+  }
+
+  export const setSign = (
+    sd: G,
+    els?: Element[],
+    p: position = { x: 0, y: 0 }
+  ) => {
+    // clearing signs
+    sd.children().forEach((el) => {
+      if (el.hasClass('tds-step-dotssing')) {
+        el.remove(), (el = undefined)
+      }
+    })
+
+    // adds signs, three circles by default or user defined
+    if (!els) {
+      let _x = sd.x()
+      let _y = sd.y()
+      sd.add(stepdotdef({ x: _x + 6, y: _y + 6 }))
+      sd.add(stepdotdef({ x: _x + 6, y: _y + 15 }))
+      sd.add(stepdotdef({ x: _x + 6, y: _y + 25 }))
+    } else {
+      els.forEach((el) => {
+        el.addClass('tds-step-dotssing')
+        sd.add(el)
+      })
+    }
+
+    return sd
+  }
+
+  /** set background color for 'stepDots' */
+  export const updateFillColor = (sd: G, f: FillData) => {
+    sd.children()
+      .filter((el) => el.hasClass('tds-step-dotsbody'))[0]
+      .fill({ ...f })
+
+    return sd
+  }
+
+  /** shape at left side of mitemjail */
+  export const create = (attr: {
+    rectFill?: FillData
+    sings?: Element[]
+    p: position
+  }) => {
+    let gr = new G()
+    gr.addClass('tds-step-dots')
+
+    // body
+    gr.add(
+      new Rect({ width: 27, height: 36 })
+        .radius(5)
+        .fill(
+          attr.rectFill ? { ...attr.rectFill } : { color: '#F1F1F1' }
+        )
+        .stroke({ color: '#D2D2D2' })
+        .addClass('tds-step-dotsbody')
+        .move(attr.p.x, attr.p.y)
+    )
+
+    // set signs and return
+    return setSign(gr, attr.sings, attr.p)
+  }
+}
+
 export type mitemjailAttr = {
   header: TextAreaStyleAttr
   body: BackgroundStyle
   pin: Circle
+  dots: { rectFill?: FillData; sings?: Element[]; p: position }
   minSize: size
   position: { x: number; y: number }
 }
 
 export const mitemjailAttrDef = (
   s: string,
-  p: { x: number; y: number }
+  p: { x: number; y: number },
+  d?: { f?: FillData; els?: Element[] }
 ): mitemjailAttr => {
   let _p = mitemjailPinDefStyle()
   return {
@@ -119,6 +197,11 @@ export const mitemjailAttrDef = (
       position: { x: 0, y: 0 },
       maxRows: 2,
       disallowDirect: true,
+    },
+    dots: {
+      rectFill: d?.f && undefined,
+      sings: d?.els && undefined,
+      p: p,
     },
     body: mitemjailBodyDefStyle(),
     pin: new Circle()
@@ -134,6 +217,7 @@ export class mitemjail extends G {
   header: textarea
   body: background
   pin: Circle
+  dots: G
   minSize: size
   #operMinSize: any
 
@@ -156,7 +240,10 @@ export class mitemjail extends G {
 
     this.body = new background(attr.body)
     this.header = new textarea(attr.header)
+    this.dots = stdots.create(attr.dots)
+    this.dots.dx(-18)
 
+    this.add(this.dots)
     this.add(this.body)
     this.add(this.header)
 
@@ -174,9 +261,10 @@ export class mitemjail extends G {
     this.dragendHandler()
 
     // hide items
-    this.header.on('dblclick', () => {
+    this.dots.on('mousedown', () => {
       this.hideHandler()
     })
+
     this.pin.on('dblclick', (ev: MouseEvent) => {
       ev.preventDefault()
       this.autosize()

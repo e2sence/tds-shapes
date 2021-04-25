@@ -56,12 +56,18 @@ export class label extends G {
       }
     }
 
-    applyRules(this.title, this.background, this.rules, this.indents)
+    applyRules(
+      this.title,
+      this.background,
+      this.rules,
+      this.indents
+    )
 
     this.background && this.add(this.background)
     this.add(this.title)
 
-    attr.position && this.move(attr.position.x, attr.position.y)
+    attr.position &&
+      this.move(attr.position.x, attr.position.y)
   }
 
   // value operations
@@ -81,7 +87,10 @@ export class label extends G {
    * @param r new rules
    * @param i new indents
    */
-  applyRules(r: TitleToBackgroundRules[], i: Indents = [0, 0, 0, 0]) {
+  applyRules(
+    r: TitleToBackgroundRules[],
+    i: Indents = [0, 0, 0, 0]
+  ) {
     // store rules and indents
     this.rules = []
     this.rules.push(...r)
@@ -94,6 +103,8 @@ export class label extends G {
       this.indents
       // this.widthFactor
     )
+
+    return this
   }
 }
 
