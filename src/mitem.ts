@@ -1,8 +1,4 @@
-import {
-  StrokeData,
-  Element,
-  FillData,
-} from '@svgdotjs/svg.js'
+import { StrokeData, Element, FillData } from '@svgdotjs/svg.js'
 
 import {
   AnchorsMap,
@@ -160,7 +156,11 @@ export class mitem extends label {
     })
 
     this.on('dragstart', (ev: CustomEvent) => {
-      // this.parents()[0].type
+      // if drag start from 'tds-container'
+      if (this.parents()[0].hasClass('tds-container')) {
+        // this.parents()[0].fire('tds-mitemliveyou', this)
+      }
+
       if (this.parent() != this.root()) this.toRoot()
 
       // skipping the mouse movement event through the element when dragging
@@ -211,6 +211,8 @@ export class mitem extends label {
             y: cb.cy,
           })
         ) {
+          //! ---------------------------------------------------
+          //! at this point mitem adds to jail
           r[rl - 1].add(this)
         }
       }
@@ -231,10 +233,7 @@ export class mitem extends label {
     // 'mitems' directly on field
     let fi = this.parent()
       .children()
-      .filter(
-        (el: Element) =>
-          el.hasClass('tds-mitem') && el != this
-      )
+      .filter((el: Element) => el.hasClass('tds-mitem') && el != this)
 
     // mitems inside 'tds-container'
     let ja: mitem[] = []
@@ -329,12 +328,10 @@ export class mitem extends label {
         )
       } else {
         this.cx(
-          ev.detail.event.x -
-            (ev.detail.event.x % this.widthFactor)
+          ev.detail.event.x - (ev.detail.event.x % this.widthFactor)
         )
         this.cy(
-          ev.detail.event.y -
-            (ev.detail.event.y % this.widthFactor)
+          ev.detail.event.y - (ev.detail.event.y % this.widthFactor)
         )
         c = false
       }
@@ -398,9 +395,7 @@ export class mitem extends label {
   private correctWidth() {
     let curWidth = this.background.width()
     this.background.width(
-      curWidth -
-        (curWidth % this.widthFactor) +
-        this.widthFactor
+      curWidth - (curWidth % this.widthFactor) + this.widthFactor
     )
   }
 

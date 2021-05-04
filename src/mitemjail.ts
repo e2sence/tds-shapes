@@ -1,9 +1,16 @@
-import { G, Circle, Element, FillData, Rect } from '@svgdotjs/svg.js'
+import {
+  G,
+  Circle,
+  Element,
+  FillData,
+  Rect,
+} from '@svgdotjs/svg.js'
 import { background } from './background'
 import {
   BackgroundStyle,
   Create_ID,
   GRID_STEP,
+  pointInRect,
   position,
   size,
   TitleStyle,
@@ -16,7 +23,7 @@ export const mitemjailHeaderDefStyle = (): BackgroundStyle => {
   return {
     width: 288,
     height: 36,
-    fill: { color: '#EEEEEE' },
+    fill: { color: 'white' },
     stroke: { color: '#D2D2D2', width: 1 },
     radius: 6,
     position: { x: 0, y: 0 },
@@ -64,15 +71,18 @@ export const mitemHighliteStyles = () => {
   return {
     highlite: {
       headerStroke: { color: 'black', opacity: 0.2 },
+      headerFill: { color: 'white' },
       bodyStroke: { color: 'black', opacity: 0.5 },
       pinStroke: { color: 'black', opacity: 0.5 },
     },
     select: {
       headerStroke: { color: 'black', opacity: 1 },
       bodyStroke: { color: 'black', opacity: 1 },
+      headerFill: { color: '#D0D0D0' },
       pinStroke: { color: 'black', opacity: 1 },
     },
     normal: {
+      headerFill: { color: 'white' },
       headerStroke: {
         color: '#D2D2D2',
         width: 1,
@@ -95,6 +105,7 @@ const acceptStyle = (
 ) => {
   let sel = mitemHighliteStyles()[s]
   el.header.body.stroke({ ...sel.headerStroke })
+  el.header.body.fill({ ...sel.headerFill })
   el.body.stroke({ ...sel.bodyStroke })
   el.pin.stroke({ ...sel.pinStroke })
 }
@@ -102,48 +113,70 @@ const acceptStyle = (
 /** shape at left side of mitemjail */
 export namespace stdots {
   /** just a white circle for 'stepDots' */
-  export const stepdotdef = (p: position = { x: 0, y: 0 }) => {
-    return new Circle()
-      .radius(3)
-      .fill({ color: 'white' })
-      .move(p.x, p.y)
-      .addClass('tds-step-dotssing')
-  }
-
-  export const setSign = (
-    sd: G,
-    els?: Element[],
+  export const stepdotdef = (
     p: position = { x: 0, y: 0 }
   ) => {
+    return (
+      new Circle()
+        .radius(4)
+        .fill({ color: 'white' })
+        .move(p.x, p.y)
+        // .stroke({ color: '#999999' })
+        .addClass('tds-step-dotssing')
+        .attr({ 'pointer-events': 'none' })
+    )
+  }
+
+  //
+  export const setSign = (attr: {
+    sd: G
+    els?: Element[]
+    dc?: number
+  }) => {
     // clearing signs
-    sd.children().forEach((el) => {
+    attr.sd.children().forEach((el) => {
       if (el.hasClass('tds-step-dotssing')) {
         el.remove(), (el = undefined)
       }
     })
 
-    // adds signs, three circles by default or user defined
-    if (!els) {
-      let _x = sd.x()
-      let _y = sd.y()
-      sd.add(stepdotdef({ x: _x + 6, y: _y + 6 }))
-      sd.add(stepdotdef({ x: _x + 6, y: _y + 15 }))
-      sd.add(stepdotdef({ x: _x + 6, y: _y + 25 }))
-    } else {
-      els.forEach((el) => {
-        el.addClass('tds-step-dotssing')
-        sd.add(el)
-      })
-    }
+    // adds signs, three circles by default or user counted defined
+    if (!attr.els) {
+      attr.dc ??= 1
 
-    return sd
+      let _x = attr.sd.x()
+      let _y = attr.sd.y()
+
+      for (let i = 0; i < attr.dc; i++) {
+        i == 0 &&
+          attr.sd.add(stepdotdef({ x: _x + 4, y: _y + 2 }))
+        i == 1 &&
+          attr.sd.add(stepdotdef({ x: _x + 4, y: _y + 13 }))
+        i == 2 &&
+          attr.sd.add(stepdotdef({ x: _x + 4, y: _y + 24 }))
+      }
+
+      return attr.sd
+    } else {
+      attr.els.forEach((el) => {
+        el.addClass('tds-step-dotssing')
+        attr.sd.add(el)
+      })
+      return attr.sd
+    }
   }
 
-  /** set background color for 'stepDots' */
-  export const updateFillColor = (sd: G, f: FillData) => {
+  /** set background color and quantity for 'stepDots' */
+  export const updateFillColor = (
+    sd: G,
+    f: FillData,
+    dq: number
+  ) => {
     sd.children()
       .filter((el) => el.hasClass('tds-step-dotsbody'))[0]
       .fill({ ...f })
+
+    setSign({ sd: sd, dc: dq })
 
     return sd
   }
@@ -152,6 +185,7 @@ export namespace stdots {
   export const create = (attr: {
     rectFill?: FillData
     sings?: Element[]
+    dtsC?: number
     p: position
   }) => {
     let gr = new G()
@@ -162,7 +196,9 @@ export namespace stdots {
       new Rect({ width: 27, height: 36 })
         .radius(5)
         .fill(
-          attr.rectFill ? { ...attr.rectFill } : { color: '#F1F1F1' }
+          attr.rectFill
+            ? { ...attr.rectFill }
+            : { color: '#F1F1F1' }
         )
         .stroke({ color: '#D2D2D2' })
         .addClass('tds-step-dotsbody')
@@ -170,7 +206,11 @@ export namespace stdots {
     )
 
     // set signs and return
-    return setSign(gr, attr.sings, attr.p)
+    return setSign({
+      sd: gr,
+      els: attr.sings,
+      dc: attr.dtsC,
+    })
   }
 }
 
@@ -178,7 +218,11 @@ export type mitemjailAttr = {
   header: TextAreaStyleAttr
   body: BackgroundStyle
   pin: Circle
-  dots: { rectFill?: FillData; sings?: Element[]; p: position }
+  dots: {
+    rectFill?: FillData
+    sings?: Element[]
+    p: position
+  }
   minSize: size
   position: { x: number; y: number }
 }
@@ -216,10 +260,12 @@ export const mitemjailAttrDef = (
 export class mitemjail extends G {
   header: textarea
   body: background
-  pin: Circle
   dots: G
+
+  pin: Circle
   minSize: size
   #operMinSize: any
+  inchangeSize: boolean = false // blocking ability to hide on change body size using 'pin'
 
   collapsed: boolean = false
   beforeCollapseSize: size = { width: 0, height: 0 }
@@ -229,7 +275,9 @@ export class mitemjail extends G {
 
   constructor(attr: mitemjailAttr) {
     super()
-    this.addClass('tds-container').id(Create_ID())
+    this.addClass('tds-container tds-mitemjail').id(
+      Create_ID()
+    )
 
     attr.body.position.x += attr.position.x
     attr.body.position.y += attr.position.y
@@ -252,37 +300,86 @@ export class mitemjail extends G {
     this.pin.cx(_bb.x2)
     this.pin.cy(_bb.y2)
     this.add(this.pin)
+
+    // snap to grid
+    this.dragendHandler()
+
     this.pin.on('beforedrag', () => {
       this.#operMinSize = this.maxXY
+      this.inchangeSize = true
     })
     this.pin.on('dragmove', (ev: CustomEvent) => {
       this.pinMoveHandler(ev)
     })
-    this.dragendHandler()
-
-    // hide items
-    this.dots.on('mousedown', () => {
-      this.hideHandler()
+    this.pin.on('dragend', () => {
+      this.inchangeSize = false
     })
-
     this.pin.on('dblclick', (ev: MouseEvent) => {
       ev.preventDefault()
       this.autosize()
     })
 
-    this.on('dragmove', () => {})
+    // hide items
+    this.dots.on('mouseup', (ev: MouseEvent) => {
+      if (!this.inchangeSize) this.hideHandler()
+    })
+
+    this.on('beforedrag', () => {})
     this.on('dragend', () => {
       // snap to grid on drag end
       this.dragendHandler()
     })
 
-    // selection region
+    this.on('mousedown', (ev: MouseEvent) => {
+      // get click position
+      let cl = {
+        x: ev.x + window.pageXOffset,
+        y: ev.y + window.pageYOffset,
+      }
+      let cb = this.dots.bbox()
+      // check is click in 'dots'
+      if (
+        !pointInRect(
+          { x1: cb.x, x2: cb.x2, y1: cb.y, y2: cb.y2 },
+          { x: cl.x, y: cl.y }
+        )
+      ) {
+        // set selection if current click not in dots
+        if (!this.selected) {
+          this.selected = true
+          acceptStyle(this, 'select')
+          this.fire('tds-mitemjail-directSelect', this)
+        }
+      }
+    })
+
     this.on('mouseenter', () => {
-      acceptStyle(this, 'highlite')
+      if (!this.selected) acceptStyle(this, 'highlite')
     })
     this.on('mouseleave', () => {
-      acceptStyle(this, 'normal')
+      if (!this.selected) acceptStyle(this, 'normal')
     })
+  }
+
+  /** switch selection
+   * state - if defined, sets directly to 'true' or 'false'
+   * in other case just 'switch'
+   */
+  select(state?: boolean) {
+    state != undefined
+      ? state
+        ? // set select
+          ((this.selected = true),
+          acceptStyle(this, 'select'))
+        : // remove select
+          ((this.selected = false),
+          acceptStyle(this, 'normal'))
+      : // switch
+      this.selected
+      ? ((this.selected = false),
+        acceptStyle(this, 'normal'))
+      : ((this.selected = true),
+        acceptStyle(this, 'select'))
   }
 
   /** automatic adjustment of the body size to the elements inside */
@@ -299,6 +396,7 @@ export class mitemjail extends G {
     }
   }
 
+  // hide body and child mitems
   hideHandler() {
     if (!this.collapsed) {
       // store size
@@ -313,12 +411,9 @@ export class mitemjail extends G {
       // collapse body
       this.body.width(0)
       this.body.height(0)
-      // move pin
-      let cb = this.header.bbox()
-      this.pin.cx(cb.x2)
-      this.pin.cy(cb.y2)
+      // hide pin
       this.pin.draggable(false)
-      this.pin.backward()
+      this.pin.hide()
 
       this.collapsed = true
     } else {
@@ -331,6 +426,7 @@ export class mitemjail extends G {
       this.body.height(this.beforeCollapseSize.height)
       //move pin
       let cb = this.body.bbox()
+      this.pin.show()
       this.pin.cx(cb.x2)
       this.pin.cy(cb.y2)
       this.pin.draggable(true)
@@ -351,9 +447,12 @@ export class mitemjail extends G {
 
   /** child elements */
   get items() {
-    return this.children().filter((el) => el instanceof mitem)
+    return this.children().filter(
+      (el) => el instanceof mitem
+    )
   }
 
+  // get the maximum possible size given the subordinate elements
   get maxXY() {
     // take the coordinates as far as possible from the upper left corner
     let xy = this.items.map((el) => el.bbox())
@@ -395,7 +494,7 @@ export class mitemjail extends G {
     //// adds only mitem instances
     //highlight adding mitems
     if (el instanceof mitem) {
-      //   console.log('mitem adds )')
+      console.log(el.remember('ml'))
     }
     return this
   }
@@ -416,8 +515,12 @@ export class mitemjail extends G {
     x < _oper.x && (x = _oper.x)
     y < _oper.y && (y = _oper.y)
 
-    this.body.width(x - this.body.x() + this.pin.width() / 2)
-    this.body.height(y - this.body.y() + this.pin.height() / 2)
+    this.body.width(
+      x - this.body.x() + this.pin.width() / 2
+    )
+    this.body.height(
+      y - this.body.y() + this.pin.height() / 2
+    )
 
     handler.move(x, y)
   }
