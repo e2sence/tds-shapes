@@ -11,6 +11,7 @@ import {
   Create_ID,
   GRID_STEP,
   pointInRect,
+  posdef,
   position,
   size,
   TitleStyle,
@@ -29,8 +30,7 @@ export const mitemjailHeaderDefStyle = (): BackgroundStyle => {
     position: { x: 0, y: 0 },
   }
 }
-
-/** default style for single row in  */
+/** default style for single row in header*/
 export const mitemjailRowDefStyle = (): TitleStyle => {
   return {
     value: '\u2800',
@@ -41,7 +41,6 @@ export const mitemjailRowDefStyle = (): TitleStyle => {
     fill: { color: 'black' },
   }
 }
-
 /** default style for mitemjail body */
 export const mitemjailBodyDefStyle = (): BackgroundStyle => {
   return {
@@ -57,7 +56,6 @@ export const mitemjailBodyDefStyle = (): BackgroundStyle => {
     position: { x: 0, y: 36 },
   }
 }
-
 /** default style for mitemjail pin */
 export const mitemjailPinDefStyle = () => {
   return {
@@ -66,7 +64,37 @@ export const mitemjailPinDefStyle = () => {
     stroke: { color: '#999999', width: 1 },
   }
 }
+/** style (and later creation) for element at top left zone which is responsible for collapsing */
+export const mitemjailDotsDefStyle = () => {
+  return {
+    width: 27,
+    height: 36,
+    radius: 6,
+    fill: { color: 'white' },
+    stroke: { color: '#D2D2D2', width: 1 },
+    position: posdef,
+  }
+}
+/**
+ * @param pp parent position
+ * @returns Element
+ */
+export const mitemjailDotsDef = (pp: position): G => {
+  let a = mitemjailDotsDefStyle()
+  return new G().add(
+    new Rect()
+      .width(a.width)
+      .height(a.height)
+      .radius(a.radius)
+      .fill({ ...a.fill })
+      .stroke({ ...a.stroke })
+      .x(pp.x)
+      .y(pp.y)
+      .addClass('tds-mitemjaildots-background')
+  )
+}
 
+/** styles applied on highlite, select or normal state */
 export const mitemHighliteStyles = () => {
   return {
     highlite: {
@@ -99,121 +127,22 @@ export const mitemHighliteStyles = () => {
   }
 }
 
+/** apply style for mitemjail */
 const acceptStyle = (
   el: mitemjail,
   s: 'highlite' | 'select' | 'normal'
 ) => {
   let sel = mitemHighliteStyles()[s]
+
   el.header.body.stroke({ ...sel.headerStroke })
   el.header.body.fill({ ...sel.headerFill })
+
   el.body.stroke({ ...sel.bodyStroke })
+
   el.pin.stroke({ ...sel.pinStroke })
 }
 
-/** shape at left side of mitemjail */
-export namespace stdots {
-  /** just a white circle for 'stepDots' */
-  export const stepdotdef = (
-    p: position = { x: 0, y: 0 }
-  ) => {
-    return (
-      new Circle()
-        .radius(4)
-        .fill({ color: 'white' })
-        .move(p.x, p.y)
-        // .stroke({ color: '#999999' })
-        .addClass('tds-step-dotssing')
-        .attr({ 'pointer-events': 'none' })
-    )
-  }
-
-  //
-  export const setSign = (attr: {
-    sd: G
-    els?: Element[]
-    dc?: number
-  }) => {
-    // clearing signs
-    attr.sd.children().forEach((el) => {
-      if (el.hasClass('tds-step-dotssing')) {
-        el.remove(), (el = undefined)
-      }
-    })
-
-    // adds signs, three circles by default or user counted defined
-    if (!attr.els) {
-      attr.dc ??= 1
-
-      let _x = attr.sd.x()
-      let _y = attr.sd.y()
-
-      for (let i = 0; i < attr.dc; i++) {
-        i == 0 &&
-          attr.sd.add(stepdotdef({ x: _x + 4, y: _y + 2 }))
-        i == 1 &&
-          attr.sd.add(stepdotdef({ x: _x + 4, y: _y + 13 }))
-        i == 2 &&
-          attr.sd.add(stepdotdef({ x: _x + 4, y: _y + 24 }))
-      }
-
-      return attr.sd
-    } else {
-      attr.els.forEach((el) => {
-        el.addClass('tds-step-dotssing')
-        attr.sd.add(el)
-      })
-      return attr.sd
-    }
-  }
-
-  /** set background color and quantity for 'stepDots' */
-  export const updateFillColor = (
-    sd: G,
-    f: FillData,
-    dq: number
-  ) => {
-    sd.children()
-      .filter((el) => el.hasClass('tds-step-dotsbody'))[0]
-      .fill({ ...f })
-
-    setSign({ sd: sd, dc: dq })
-
-    return sd
-  }
-
-  /** shape at left side of mitemjail */
-  export const create = (attr: {
-    rectFill?: FillData
-    sings?: Element[]
-    dtsC?: number
-    p: position
-  }) => {
-    let gr = new G()
-    gr.addClass('tds-step-dots')
-
-    // body
-    gr.add(
-      new Rect({ width: 27, height: 36 })
-        .radius(5)
-        .fill(
-          attr.rectFill
-            ? { ...attr.rectFill }
-            : { color: '#F1F1F1' }
-        )
-        .stroke({ color: '#D2D2D2' })
-        .addClass('tds-step-dotsbody')
-        .move(attr.p.x, attr.p.y)
-    )
-
-    // set signs and return
-    return setSign({
-      sd: gr,
-      els: attr.sings,
-      dc: attr.dtsC,
-    })
-  }
-}
-
+/** type for basic jail creation */
 export type mitemjailAttr = {
   header: TextAreaStyleAttr
   body: BackgroundStyle
@@ -227,6 +156,7 @@ export type mitemjailAttr = {
   position: { x: number; y: number }
 }
 
+/** mitemjail default view */
 export const mitemjailAttrDef = (
   s: string,
   p: { x: number; y: number },
@@ -257,6 +187,7 @@ export const mitemjailAttrDef = (
   }
 }
 
+/** container for mitems */
 export class mitemjail extends G {
   header: textarea
   body: background
@@ -288,7 +219,7 @@ export class mitemjail extends G {
 
     this.body = new background(attr.body)
     this.header = new textarea(attr.header)
-    this.dots = stdots.create(attr.dots)
+    this.dots = mitemjailDotsDef(attr.position)
     this.dots.dx(-18)
 
     this.add(this.dots)
@@ -320,11 +251,11 @@ export class mitemjail extends G {
     })
 
     // hide items
-    this.dots.on('mouseup', (ev: MouseEvent) => {
+    this.dots.on('mousedown', (ev: MouseEvent) => {
+      ev.preventDefault()
       if (!this.inchangeSize) this.hideHandler()
     })
 
-    this.on('beforedrag', () => {})
     this.on('dragend', () => {
       // snap to grid on drag end
       this.dragendHandler()
@@ -409,8 +340,7 @@ export class mitemjail extends G {
         el.hide()
       })
       // collapse body
-      this.body.width(0)
-      this.body.height(0)
+      this.body.hide()
       // hide pin
       this.pin.draggable(false)
       this.pin.hide()
@@ -422,8 +352,9 @@ export class mitemjail extends G {
         el.show()
       })
       // restore body size
-      this.body.width(this.beforeCollapseSize.width)
-      this.body.height(this.beforeCollapseSize.height)
+      let hb = this.header.bbox()
+      this.body.show()
+      this.body.move(hb.x, hb.y2)
       //move pin
       let cb = this.body.bbox()
       this.pin.show()
@@ -491,10 +422,10 @@ export class mitemjail extends G {
   /** proxy parent 'add' */
   add(el: Element, i?: number) {
     super.add(el, i)
-    //// adds only mitem instances
+
     //highlight adding mitems
     if (el instanceof mitem) {
-      console.log(el.remember('ml'))
+      this.fire('tds-mitemjail-hasnewmitem', el)
     }
     return this
   }
