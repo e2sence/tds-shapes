@@ -75,7 +75,7 @@ export class textbox extends label {
       tb.dispatch('tds-textbox-beforechange', tb)
 
       let _v = tb.title.value
-      if (_v == '\u2800') {
+      if (_v == ' ') {
         _v = ''
       }
 
@@ -115,7 +115,7 @@ export class textbox extends label {
             _v !== ''
               ? (tb.value = _v)
               : tb.inputType == 'text'
-              ? (tb.value = '\u2800')
+              ? (tb.value = ' ')
               : (tb.value = Number(0).toString())
 
             tb.setInputVisibility(false)
@@ -136,7 +136,9 @@ export class textbox extends label {
 
   /** get input as HTMLInputElement */
   getInput() {
-    return document.getElementById(this.inputID) as HTMLInputElement
+    return document.getElementById(
+      this.inputID
+    ) as HTMLInputElement
   }
 
   /** hide/ show input field */
@@ -145,17 +147,24 @@ export class textbox extends label {
 
     if (isVisible) {
       this.hide()
-      this.input.node.setAttribute('style', 'display: inline-block;')
+      this.input.node.setAttribute(
+        'style',
+        'display: inline-block;'
+      )
       // set focus and move cursor to end
       el.focus()
       // if input type is 'text'
       this.inputType == 'text'
-        ? (el.selectionEnd = el.selectionStart = this.value.length)
+        ? (el.selectionEnd = el.selectionStart =
+            this.value.length)
         : 0
     } else {
       this.show()
       if (this.input)
-        this.input?.node?.setAttribute('style', 'display: none;')
+        this.input?.node?.setAttribute(
+          'style',
+          'display: none;'
+        )
     }
   }
 }

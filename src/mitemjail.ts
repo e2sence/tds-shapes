@@ -20,16 +20,17 @@ import { mitem } from './mitem'
 import { textarea, TextAreaStyleAttr } from './textarea'
 
 /** default body style for mitemjail header */
-export const mitemjailHeaderDefStyle = (): BackgroundStyle => {
-  return {
-    width: 288,
-    height: 36,
-    fill: { color: 'white' },
-    stroke: { color: '#D2D2D2', width: 1 },
-    radius: 6,
-    position: { x: 0, y: 0 },
+export const mitemjailHeaderDefStyle =
+  (): BackgroundStyle => {
+    return {
+      width: 288,
+      height: 36,
+      fill: { color: 'white' },
+      stroke: { color: '#D2D2D2', width: 1 },
+      radius: 6,
+      position: { x: 0, y: 0 },
+    }
   }
-}
 /** default style for single row in header*/
 export const mitemjailRowDefStyle = (): TitleStyle => {
   return {
@@ -42,20 +43,21 @@ export const mitemjailRowDefStyle = (): TitleStyle => {
   }
 }
 /** default style for mitemjail body */
-export const mitemjailBodyDefStyle = (): BackgroundStyle => {
-  return {
-    width: 324,
-    height: 144,
-    radius: 4,
-    fill: { color: '#F1F1F1' },
-    stroke: {
-      color: '#D2D2D2',
-      width: 1,
-      dasharray: '5 5',
-    },
-    position: { x: 0, y: 36 },
+export const mitemjailBodyDefStyle =
+  (): BackgroundStyle => {
+    return {
+      width: 324,
+      height: 144,
+      radius: 4,
+      fill: { color: '#F1F1F1' },
+      stroke: {
+        color: '#D2D2D2',
+        width: 1,
+        dasharray: '5 5',
+      },
+      position: { x: 0, y: 36 },
+    }
   }
-}
 /** default style for mitemjail pin */
 export const mitemjailPinDefStyle = () => {
   return {
@@ -70,7 +72,7 @@ export const mitemjailDotsDefStyle = () => {
     width: 27,
     height: 36,
     radius: 6,
-    fill: { color: 'white' },
+    fill: { color: '#F1F1F1' },
     stroke: { color: '#D2D2D2', width: 1 },
     position: posdef,
   }
@@ -86,7 +88,7 @@ export const mitemjailDotsDef = (pp: position): G => {
       .width(a.width)
       .height(a.height)
       .radius(a.radius)
-      .fill({ ...a.fill })
+      .fill({ color: '#F1F1F1' })
       .stroke({ ...a.stroke })
       .x(pp.x)
       .y(pp.y)
@@ -106,7 +108,7 @@ export const mitemHighliteStyles = () => {
     select: {
       headerStroke: { color: 'black', opacity: 1 },
       bodyStroke: { color: 'black', opacity: 1 },
-      headerFill: { color: '#D0D0D0' },
+      headerFill: { color: '#D2D2D2' },
       pinStroke: { color: 'black', opacity: 1 },
     },
     normal: {
@@ -173,7 +175,7 @@ export const mitemjailAttrDef = (
       disallowDirect: true,
     },
     dots: {
-      rectFill: d?.f && undefined,
+      rectFill: { color: '#F1F1F1' },
       sings: d?.els && undefined,
       p: p,
     },
@@ -204,7 +206,12 @@ export class mitemjail extends G {
   selected: boolean = false
   dragFlag: boolean = false
 
-  constructor(attr: mitemjailAttr) {
+  /**
+   * new mitemjail instance
+   * @param attr def attr
+   * @param mh is manual hide
+   */
+  constructor(attr: mitemjailAttr, mh: boolean = false) {
     super()
     this.addClass('tds-container tds-mitemjail').id(
       Create_ID()
@@ -329,6 +336,7 @@ export class mitemjail extends G {
 
   // hide body and child mitems
   hideHandler() {
+    // simple hide/show inner items
     if (!this.collapsed) {
       // store size
       this.beforeCollapseSize = {
@@ -372,15 +380,19 @@ export class mitemjail extends G {
     const box = this.bbox()
     this.move(
       box.x - (box.x % GRID_STEP),
-      box.y - (box.y % GRID_STEP)
+      box.y - (box.y % GRID_STEP) + 2 //! -------
     )
   }
 
   /** child elements */
-  get items() {
-    return this.children().filter(
-      (el) => el instanceof mitem
-    )
+  get items(): mitem[] {
+    let _i: mitem[] = []
+
+    this.children()
+      .filter((el) => el instanceof mitem)
+      .map((el) => (el instanceof mitem ? _i.push(el) : 0))
+
+    return _i
   }
 
   // get the maximum possible size given the subordinate elements

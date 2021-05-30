@@ -25,6 +25,8 @@ const createText = (attr: TitleStyle): Text => {
     y: attr.position?.y + ts.height - ts.y2,
   })
 
+  //! title.node.removeAttribute('svgjs:data')
+
   return title
 }
 

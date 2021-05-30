@@ -1,5 +1,9 @@
 import { G, Rect, Text } from '@svgdotjs/svg.js'
-import { BackgroundStyle, Create_ID, TitleStyle } from './common'
+import {
+  BackgroundStyle,
+  Create_ID,
+  TitleStyle,
+} from './common'
 import { title } from './title'
 
 import { Dom } from '@svgdotjs/svg.js'
@@ -16,7 +20,7 @@ export const textareaDefStyle: BackgroundStyle = {
 
 /** default style for single row */
 export const extendsTittleDefStyle: TitleStyle = {
-  value: '\u2800',
+  value: 'a',
   font: 'Menlo',
   fontWeight: 'normal',
   size: 12,
@@ -96,8 +100,10 @@ export class textarea extends G {
     // adds title if available
     if (attr.headerTitleStyle) {
       // correct position according to 'body'
-      attr.headerTitleStyle.position.x += attr.body.position.x
-      attr.headerTitleStyle.position.y += attr.body.position.y
+      attr.headerTitleStyle.position.x +=
+        attr.body.position.x
+      attr.headerTitleStyle.position.y +=
+        attr.body.position.y
 
       this.title = new title(attr.headerTitleStyle)
       this.add(this.title)
@@ -121,7 +127,11 @@ export class textarea extends G {
         ))
 
     // adds rows to body
-    this.fillRows(attr.data, this.rowLen, attr.rowsTitleStyle)
+    this.fillRows(
+      attr.data,
+      this.rowLen,
+      attr.rowsTitleStyle
+    )
 
     // hide input before drag
     this.on('beforedrag', () => {
@@ -155,8 +165,7 @@ export class textarea extends G {
       })
 
     let _v = this.value
-
-    if (_v == '\u2800') {
+    if (_v == '\u2007') {
       _v = ''
     }
 
@@ -184,21 +193,22 @@ export class textarea extends G {
       'keydown',
       (ev: KeyboardEvent) => {
         if (ev.key == 'Enter') {
-          // if (!ev.shiftKey) {
           this.clearRows()
           let _v = this.getInput().value
 
-          // console.log(ta.getInput().innerHTML)
+          _v == '' && (_v = '\u2007')
 
-          _v == '' && (_v = '\u2800')
-
-          this.fillRows(_v, this.rowLen, extendsTittleDefStyle)
+          this.fillRows(
+            _v,
+            this.rowLen,
+            extendsTittleDefStyle
+          )
 
           this.dispatch('tds-textarea-valuechanged', this)
 
           this.setInputVisibility(false)
         }
-        //   }
+
         if (ev.key == 'Escape') {
           this.setInputVisibility(false)
         }
@@ -209,12 +219,18 @@ export class textarea extends G {
 
   /** calculating line length depending on body width */
   setRowLen(bw: number, ta: TitleStyle, f: number = 0.97) {
-    return Math.floor((bw / new title(ta).bbox().width) * f)
+    let _r = Math.floor(
+      (bw / new title(ta).bbox().width) * f
+    )
+
+    return _r
   }
 
   /** calculating maxRows depending on body height */
   setMaxRows(bh: number, ta: TitleStyle, f: number = 0.97) {
-    return Math.floor((bh / new title(ta).bbox().height) * f)
+    return Math.floor(
+      (bh / new title(ta).bbox().height) * f
+    )
   }
 
   /**
@@ -285,6 +301,7 @@ export class textarea extends G {
       if (i < rl - 1) r += el.value + ' '
       if (i == rl - 1) r += el.value
     })
+    // return r.replace(/\s{2,}/g, '\u00A0')
     return r.replace(/\s{2,}/g, ' ')
   }
 
@@ -295,7 +312,9 @@ export class textarea extends G {
 
   /** get input as HTMLInputElement */
   getInput() {
-    return document.getElementById(this.inputID) as HTMLInputElement
+    return document.getElementById(
+      this.inputID
+    ) as HTMLInputElement
   }
 
   /** hide/ show input field */
@@ -303,19 +322,27 @@ export class textarea extends G {
     let el = this.getInput()
     if (isVisible) {
       this.body.hide()
-      this.input.node.setAttribute('style', 'display: inline-block;')
+      this.input.node.setAttribute(
+        'style',
+        'display: inline-block;'
+      )
       el.focus()
-      el.selectionEnd = el.selectionStart = this.value.length
+      el.selectionEnd = el.selectionStart =
+        this.value.length
     } else {
       this.body.show()
       if (this.input)
-        this.input?.node?.setAttribute('style', 'display: none;')
+        this.input?.node?.setAttribute(
+          'style',
+          'display: none;'
+        )
     }
   }
 }
 
 /** word wrap */
 function wordwrap(str: string, width: number) {
+  // width *= 0.9
   let strn = str
     .replace(
       new RegExp(

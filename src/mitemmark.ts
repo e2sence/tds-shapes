@@ -31,8 +31,8 @@ export const markAttrCreator = (
   p: position
 ): LabelAttr => {
   attr.tagSide == 'left'
-    ? (attr.sing = attr.sing + '\u2800')
-    : (attr.sing = '\u2800' + attr.sing)
+    ? (attr.sing = attr.sing + mark.emptySign)
+    : (attr.sing = mark.emptySign + attr.sing)
   return {
     title: {
       value: attr.sing,
@@ -73,7 +73,7 @@ export class mark extends label {
     super(markAttrCreator(attr, p))
     this.addClass('tds-mark')
 
-    this.sing = attr.sing.replace('\u2800', '')
+    this.sing = attr.sing.replace(mark.emptySign, '')
     this.side = attr.tagSide
 
     this.widthTitleFix()
@@ -87,6 +87,10 @@ export class mark extends label {
 
     // slightly move title acording to 'tagSide'
     this.title.dx(-GRID_STEP * 0.25)
+  }
+
+  static get emptySign() {
+    return '\u2007'
   }
 }
 
@@ -112,7 +116,10 @@ export class marks {
   /** check is mark exist */
   hasMark(s: string, side: MarkSide) {
     // get find string accordind to 'side'
-    let fs = side == 'left' ? s + '\u2800' : '\u2800' + s
+    let fs =
+      side == 'left'
+        ? s + mark.emptySign
+        : mark.emptySign + s
     // get storage
     let ar = this.getStorage(side)
     let fnds = ar.filter((el) => el[0].value == fs)
@@ -132,7 +139,10 @@ export class marks {
     animate: boolean = false
   ) {
     // get find string accordind to 'side'
-    let fs = side == 'left' ? s + '\u2800' : '\u2800' + s
+    let fs =
+      side == 'left'
+        ? s + mark.emptySign
+        : mark.emptySign + s
 
     // get storage
     let ar = this.getStorage(side)
@@ -181,7 +191,11 @@ export class marks {
    * @param s the side to be processed
    * @param nf set to true if use outside constructor
    */
-  setPosition(s: MarkSide, nf: boolean = false): void {
+  setPosition(
+    s: MarkSide,
+    nf: boolean = false,
+    wgl: boolean = true
+  ): void {
     // get storage
     let _st = this.getStorage(s)
 
@@ -206,9 +220,11 @@ export class marks {
         _el.back()
         opX = _x
 
-        setTimeout(() => {
-          this.wiggle(_el, 'addorput')
-        }, 50 * i)
+        if (wgl) {
+          setTimeout(() => {
+            this.wiggle(_el, 'addorput')
+          }, 50 * i)
+        }
       }
       return
     }
@@ -227,9 +243,11 @@ export class marks {
         _el.back()
         opX = _x + _st[i][1]
 
-        setTimeout(() => {
-          this.wiggle(_el, 'addorput')
-        }, 50 * i)
+        if (wgl) {
+          setTimeout(() => {
+            this.wiggle(_el, 'addorput')
+          }, 50 * i)
+        }
       }
       return
     }

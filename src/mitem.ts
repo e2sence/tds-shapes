@@ -239,7 +239,9 @@ export class mitem extends label {
       .children()
       .filter(
         (el: Element) =>
-          el.hasClass('tds-mitem') && el != this
+          el.hasClass('tds-mitem') &&
+          el != this &&
+          el.visible()
       )
 
     // mitems inside 'tds-container'
@@ -250,7 +252,7 @@ export class mitem extends label {
       .forEach((el) => {
         if (el instanceof mitemjail) {
           el.items.forEach((el) => {
-            if (el instanceof mitem) {
+            if (el instanceof mitem && el.visible()) {
               ja.push(el)
             }
           })
@@ -358,10 +360,12 @@ export class mitem extends label {
   /** handle grid snapping on end of drag */
   dragEndHandler() {
     const box = this.bbox()
+
     this.move(
       box.x - (box.x % this.widthFactor),
       box.y - (box.y % this.widthFactor)
     )
+
     this.snaped = false
   }
 
@@ -383,7 +387,9 @@ export class mitem extends label {
     })
   }
 
-  /** switch selection
+  /** switch style according to selection
+   * CAUTION!! in this case, no event is generated
+   *
    * state - if defined, sets directly to 'true' or 'false'
    * in other case just 'switch'
    */
